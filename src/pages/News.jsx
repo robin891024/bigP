@@ -9,9 +9,7 @@ function News() {
     <div className="min-h-screen flex flex-col">
 
       <Header /> 
-      
       <main className="flex-grow">
-        {/* 在 News 頁面渲染 NewsSection 組件 */}
         <NewsSection isFullPage={true} /> 
       </main>
       

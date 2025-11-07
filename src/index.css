@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* globals.css 或 index.css */
-
 :root {
   --color-primary: #f07509; 
   --color-accent: #111827;  

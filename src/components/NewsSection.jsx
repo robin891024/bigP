@@ -4,7 +4,6 @@ import { news } from './ui/news';
 
 // 1. 消息標籤組件
 const NewsTag = ({ type }) => {
-  // 使用 fuchsia-600 來匹配圖片中的紫色
   const colorClass = type === 'system' ? 'bg-fuchsia-600' : 'bg-red-600';
   const text = type === 'system' ? '系統公告' : '票券配送公告';
   return (
@@ -26,7 +25,6 @@ const NewsSection = ({ data = news }) => {
         
         {/* 內容區塊 */}
         <div className="text-sm leading-relaxed">
-          {/* 左欄顯示標籤，右欄不顯示 (根據圖片) */}
           {isLeftColumn && <NewsTag type={item.type} />} 
 
           {/* 連結文字 */}
@@ -38,18 +36,14 @@ const NewsSection = ({ data = news }) => {
   );
 
   return (
-    // max-w-6xl 控制最大寬度，mx-auto 居中
     <div className="max-w-6xl mx-auto py-8 px-4"> 
-      
-      {/* 區塊標題和「更多」連結 */}
+
       <div className="flex justify-between items-center mb-6 border-b border-accent pb-2">
         <h2 className="text-2xl font-bold">最新消息</h2>
       </div>
 
-      {/* 左右兩欄容器 (在 medium 螢幕以上轉為水平) */}
       <div className="flex flex-col md:flex-row md:space-x-12">
-        
-        {/* 左欄：主要消息 (有底線) */}
+
         <div className="w-full md:w-1/2">
           {leftColumn.map((item, index) => (
               <div key={item.id} className="border-b border-gray-100">
