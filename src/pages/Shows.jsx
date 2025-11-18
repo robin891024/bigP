@@ -182,7 +182,7 @@ export default function Shows() {
 
     return (
         <div className="font-sans min-h-screen flex flex-col">
-            <Header />
+            <Header showSearchBar={true} />
             <main className="flex-1 bg-bg px-6 py-8 max-w-7xl mx-auto w-full">
                 {/* 麵包屑 */}
                 <nav className="text-sm text-gray-500 mb-6">
