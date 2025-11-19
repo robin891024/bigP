@@ -53,28 +53,39 @@ app.get('/api/announcements', async (req, res) => {
         res.status(500).json({ message: '伺服器內部錯誤，無法載入公告。' });
     }
 });
-// [POST] /api/items: 新增一個項目
-app.post('/api/announcements', async (req, res) => {
-    // 從前端請求中取得 title 和 content
-    const { title, content } = req.body; 
-    
-    if (!title || !content) {
-        return res.status(400).json({ message: '標題 (title) 和內容 (content) 欄位為必填' });
+// [GET] /api/events: 獲取所有活動，最新活動優先
+app.get('/api/events', async (req, res) => {
+    // 確保 db 變數（MySQL 連線）可用
+    if (typeof db === 'undefined') {
+        console.error('Database connection (db) is not defined.');
+        return res.status(500).json({ message: '伺服器內部錯誤：資料庫連線未初始化。' });
     }
 
     try {
-        // 插入 SQL 語句：注意欄位名稱
-        const sql = 'INSERT INTO announcement (title, content) VALUES (?, ?)';
-        const [result] = await db.execute(sql, [title, content]); 
+        // 抓取所有必要的欄位，並依照開始日期降序排列
+        const sql = `
+            SELECT 
+                event_id, 
+                event_title, 
+                event_image, 
+                event_start_date, 
+                event_place,
+                ticket_types
+            FROM 
+                event
+            ORDER BY 
+                event_start_date DESC
+            LIMIT 10 
+        `; // 限制抓取 10 個活動用於首頁輪播
+
+        // 執行查詢
+        const [rows] = await db.execute(sql);
         
-        // 返回新增成功的結果
-        res.status(201).json({ 
-            id: result.insertId,
-            title, 
-            content 
-        }); 
+        // 成功回傳資料
+        res.status(200).json(rows); 
     } catch (err) {
-        res.status(400).json({ message: '新增公告失敗', error: err.message });
+        console.error('API 獲取活動列表失敗:', err.message);
+        res.status(500).json({ message: '伺服器內部錯誤，無法載入活動列表。' });
     }
 });
 
