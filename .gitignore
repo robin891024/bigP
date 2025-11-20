@@ -1,0 +1,30 @@
+# Node modules
+node_modules/
+frontend/node_modules/
+
+# Build outputs
+backend/target/
+frontend/dist/
+frontend/build/
+
+# Environment variables and sensitive config
+.env
+frontend/.env
+backend/.env
+backend/src/main/resources/application.properties
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Maven
+backend/.mvn/wrapper/maven-wrapper.jar

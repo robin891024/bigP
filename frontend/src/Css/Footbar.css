@@ -1,0 +1,118 @@
+/* 頁尾 */
+#footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: rgba(255, 255, 255, 0.95);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    z-index: 999;
+}
+
+/* 左側連結區域 */
+.footer-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.footer-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+    opacity: 0.9;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+}
+
+.footer-links a:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+/* 右側聯絡資訊 */
+.footer-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: right;
+    font-size: 0.8125rem;
+    opacity: 0.9;
+}
+
+.footer-contact div {
+    line-height: 1.5;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    #footer {
+        flex-direction: column;
+        padding: 1rem 1.5rem;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .footer-links {
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 100%;
+    }
+    
+    .footer-title {
+        margin-right: 0;
+        margin-bottom: 0.25rem;
+    }
+    
+    .footer-contact {
+        text-align: center;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    #footer {
+        padding: 0.875rem 1rem;
+        font-size: 0.8125rem;
+    }
+    
+    .footer-links {
+        gap: 0.5rem;
+    }
+    
+    .footer-links a {
+        font-size: 0.8125rem;
+        padding: 0.25rem 0.375rem;
+    }
+    
+    .footer-contact {
+        font-size: 0.75rem;
+    }
+}
+
+/* 為頁面內容預留底部空間 */
+body {
+    padding-bottom: 80px;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-bottom: 120px;
+    }
+}

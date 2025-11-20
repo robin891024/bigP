@@ -1,0 +1,194 @@
+/* 全域樣式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 整體版面 */
+.member-page {
+    display: flex;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    background: #f8f9fa;
+    padding-top: 60px; /* 為 Headbar 預留空間 */
+}
+
+/* 側邊欄 */
+.member-sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-item {
+    padding: 0.875rem 1.25rem;
+    text-align: left;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+}
+
+.sidebar-item.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 右側主內容 */
+.member-info {
+    flex: 1;
+    padding: 3rem;
+    background: #ffffff;
+    margin: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.member-info h2 {
+    color: #1a202c;
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+/* 資訊列 */
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #f7fafc;
+    transition: background 0.2s ease;
+}
+
+.info-row:hover {
+    background: #f7fafc;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 8px;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row span {
+    font-weight: 500;
+    color: #4a5568;
+    font-size: 1rem;
+}
+
+.info-row button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.info-row button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.info-row button:active {
+    transform: translateY(0);
+}
+
+/* Fetch 結果顯示區 */
+.fetch-message {
+    margin-top: 2.5rem;
+    padding: 1.5rem;
+    background: #f7fafc;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+    font-size: 0.875rem;
+    color: #4a5568;
+    line-height: 1.6;
+    font-family: 'Courier New', monospace;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .member-page {
+        flex-direction: column;
+        padding-top: 60px;
+    }
+    
+    .member-sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 1rem;
+        gap: 0.5rem;
+    }
+    
+    .sidebar-item {
+        white-space: nowrap;
+        padding: 0.75rem 1rem;
+    }
+    
+    .sidebar-item:hover {
+        transform: translateX(0);
+        transform: translateY(-2px);
+    }
+    
+    .member-info {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+    }
+    
+    .member-info h2 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .member-info {
+        padding: 1.5rem 1rem;
+    }
+    
+    .info-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .info-row button {
+        width: 100%;
+    }
+}
