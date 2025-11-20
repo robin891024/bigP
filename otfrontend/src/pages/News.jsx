@@ -4,25 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer'; 
 import Top from '../components/ui/Top';
 import AnnouncementList from '../components/AnnouncementList'; 
-
-
-const DetailView = ({ announcement, onBack }) => (
-  <div className="p-6 border rounded-lg shadow-lg bg-gray-50">
-    <button 
-      onClick={onBack} 
-      className="mb-4 text-primary hover:text-accent font-semibold flex items-center"
-    >
-      &larr; 返回公告列表
-    </button>
-    <h2 className="text-3xl font-bold mb-4 text-gray-800">{announcement.title}</h2>
-    <p className="text-sm text-gray-500 mb-6">發布時間: {announcement.dateOnly}</p>
-    
-    {/* 顯示 content 內容，使用 pre-wrap 保留換行和空格 */}
-    <div className="prose max-w-none whitespace-pre-wrap text-gray-700">
-      {announcement.content}
-    </div>
-  </div>
-);
+import AnnoView from '../components/AnnoView';
 
 
 function News() {
@@ -43,14 +25,14 @@ function News() {
   return (
     <>
       <Header showSearchBar={true} /> 
-      <div className="max-w-4xl mx-auto p-6 bg-white min-h-screen"> 
+      <div className="max-w-4xl mx-auto p-6 bg-white min-h-screen font-sans"> 
         <main className="flex-grow">
           
           {selectedAnnouncement ? (
             // 狀態不為 null 時，顯示詳細內容
-            <DetailView 
-              announcement={selectedAnnouncement} 
-              onBack={handleBackToList} 
+            <AnnoView 
+            announcement={selectedAnnouncement} 
+            onBack={handleBackToList} 
             />
           ) : (
             // 狀態為 null 時，顯示列表

@@ -18,7 +18,7 @@ function AnnouncementList({ limit = null, isFullPage = false, onSelectAnnounceme
                 setLoading(true);
                 setError(null);
 
-                let url = '/api/announcements';
+                let url = 'http://localhost:8080/api/announcements';
                 
                 // 1. 處理 limit 參數：如果 limit 存在，則將其作為查詢參數加入 URL
                 if (limit) {
@@ -55,7 +55,7 @@ function AnnouncementList({ limit = null, isFullPage = false, onSelectAnnounceme
         };
 
         fetchAnnouncements();
-    }, [limit]); // ❗ 將 limit 加入依賴陣列，當 limit 改變時會重新獲取
+    }, [limit]); 
 
     // --- 渲染載入和錯誤狀態 ---
     if (loading) return <div className="text-center py-8">載入中...</div>;
@@ -64,7 +64,7 @@ function AnnouncementList({ limit = null, isFullPage = false, onSelectAnnounceme
     // --- 列表主體渲染 ---
     return (
         <div className="space-y-4">
-            <h1 className="text-3xl font-bold text-gray-800 mb-8 border-b-4 border-primary pb-2 inline-block">
+            <h1 className="text-3xl font-bold text-gray-800 mb-4 border-b-4 border-primary pb-2 inline-block">
                 最新消息
             </h1>
 
