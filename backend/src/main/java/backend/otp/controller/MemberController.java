@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import backend.otp.dto.MemberDto;
 import backend.otp.entity.Member;
 import backend.otp.service.MemberService;
 import backend.otp.utils.JWTutils;
@@ -42,6 +45,27 @@ public class MemberController {
         String sql = "SELECT * FROM member";
         return jdbc.queryForList(sql, new HashMap<>());
     }
+
+    @GetMapping("/profile")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<MemberDto> getProfile() {
+
+        String account = SecurityContextHolder.getContext()
+            .getAuthentication()
+            .getName();
+
+        Member member = service.findByAccount(account);
+
+        MemberDto dto = new MemberDto();
+
+        dto.setAccount(account);
+        dto.setName(member.getName());
+        dto.setRole(member.getRole());
+        dto.setCity(member.getCity());
+
+        return ResponseEntity.ok(dto);
+    }
+    
     
     @GetMapping("/checkAc")
     public ResponseEntity<Boolean> checkAc (@RequestParam String account) {
@@ -72,7 +96,10 @@ public class MemberController {
         boolean success = service.login(account, password);
 
         if (success) {
-            String token = jwt.generateToken(account);
+            
+            Integer role = service.findRoleByAccount(account);
+
+            String token = jwt.generateToken(account, role);
 
             ResponseCookie cookie = ResponseCookie.from("jwt", token)
                 .httpOnly(true)          // 前端 JS 無法讀取

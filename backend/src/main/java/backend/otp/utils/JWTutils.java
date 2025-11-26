@@ -14,20 +14,21 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JWTutils {
-    
+
     @Value("${jwt.secret}")
     private String secretKey;
 
     @Value("${jwt.expiration}")
     private long expirationTime;
 
-    private Key getSigningKey () {
+    private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, Integer role) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("role", role)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
@@ -54,5 +55,31 @@ public class JWTutils {
                 .getBody();
 
         return claims.getSubject();
+    }
+
+    public Integer getRoleFromToken(String token) {
+        Claims claim = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claim.get("role", Integer.class);
+    }
+
+    public String generateRegisterToken(String email, String name) {
+        return Jwts.builder()
+                .claim("email", email)
+                .claim("name", name)
+                .setExpiration(new Date(System.currentTimeMillis() + 3 * 60 * 1000)) // 3 分鐘
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public Claims parseRegisterToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

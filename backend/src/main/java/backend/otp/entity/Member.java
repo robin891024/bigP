@@ -27,5 +27,7 @@ public class Member {
     @Column(nullable = true)
     private String name;
 
+    private Integer role;
 
+    private String city;
 }

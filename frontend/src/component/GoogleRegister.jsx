@@ -1,16 +1,50 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import "../Css/Register.css"
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDarkMode } from "../hooks/useDarkMode"
 
-function Register() {
-    const navigate = useNavigate()
+function GoogleRegister() {
+    const locationdata = useLocation();
+    const navigate = useNavigate();
 
-    const [email_f, setEmail_f] = useState("");
-    const [email_b, setEmail_b] = useState("");
+    const registerToken = locationdata.state?.registerToken;
+    const [account, setAccount] = useState("");
+    const [Cname, setCName] = useState("");
+
+    useEffect(() => {
+        if (!registerToken) {
+            navigate("/login");
+            return;
+        }
+
+        const getLoginData = async () => {
+            try {
+                const res = await fetch("http://localhost:8080/oauth2/google/register-data", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ token: registerToken })
+                })
+
+                const data = await res.json();
+
+                if (data.success) {
+                    setAccount(data.email);
+                    setCName(data.name);
+                } else {
+                    alert("Google 登入資料已過期，請重新登入");
+                    navigate("/login");
+                }
+            } catch (err) {
+                alert("無法連線伺服器");
+            }
+
+        };
+        getLoginData();
+    }, [navigate, registerToken]);
+
     const [password, setPassword] = useState("");
-    const [checkMessage, setCheckMessage] = useState("");
-    const [cname, setCname] = useState("");
     const [location, setLocation] = useState("");
     const [alertMsg, setAlertMsg] = useState("");
     const [alertType, setAlertType] = useState("");
@@ -28,19 +62,18 @@ function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!email_f || !email_b || !password || !cname || !location) {
+        if (!password || !location) {
             showAlert("⚠️ 請完整填寫資料", "error");
             return;
         }
 
         try {
-            const response = await fetch("http://localhost:8080/member/register", {
+            const response = await fetch("http://localhost:8080/oauth2/google/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    account : email_f + "@" + email_b,
+                    token: registerToken,
                     password,
-                    name: cname,
                     city: location || ""
                 }),
             });
@@ -50,42 +83,18 @@ function Register() {
             const data = await response.json();
 
             if (data.success) {
-                showAlert("🎉 註冊成功！即將跳轉到登入頁面...", "success");
-                setEmail_f("");
-                setEmail_b("");
+                showAlert("🎉 google註冊成功！", "success");
                 setPassword("");
-                setCname("");
                 setLocation("");
-                setCheckMessage("");
 
                 setTimeout(() => {
-                    navigate("/login");
+                    navigate("/member");
                 }, 2000)
             } else {
                 showAlert("❌ 註冊失敗！", "error");
             }
         } catch (err) {
             showAlert("❌ 無法連線到伺服器", "error");
-        }
-    };
-
-    const checkAc = async (e) => {
-        e.preventDefault();
-
-        if (!email_f.trim() || !email_b.trim()) {
-            setCheckMessage("⚠️ 請輸入帳號");
-            return;
-        }
-
-        try {
-            const fullEmail = `${email_f}@${email_b}`
-            const response = await fetch(`http://localhost:8080/member/checkAc?account=${fullEmail}`);
-            if (!response.ok) throw new Error("伺服器回應錯誤");
-
-            const isExist = await response.json();
-            setCheckMessage(isExist ? "❌ 帳號已被使用" : "✅ 帳號可使用");
-        } catch (err) {
-            setCheckMessage("❌ 無法檢查帳號，請稍後再試");
         }
     };
 
@@ -115,7 +124,7 @@ function Register() {
                         {isDark ? "light_mode" : "dark_mode"}
                     </span>
                 </button>
-                
+
                 <div className="register-container">
                     <div className="register-card">
                         <div className="register-header">
@@ -127,35 +136,8 @@ function Register() {
                             <div className="form-group">
                                 <label htmlFor="email">帳號</label>
                                 <div className="email-input-group">
-                                    <input
-                                        type="text"
-                                        id="email_f"
-                                        className="email-input-left"
-                                        value={email_f}
-                                        onBlur={checkAc}
-                                        onChange={(e) => setEmail_f(e.target.value)}
-                                        autoComplete="off"
-                                        placeholder="使用者名稱"
-                                        required
-                                    />
-                                    <span className="email-separator">@</span>
-                                    <input
-                                        type="text"
-                                        id="email_b"
-                                        className="email-input-right"
-                                        value={email_b}
-                                        onBlur={checkAc}
-                                        onChange={(e) => setEmail_b(e.target.value)}
-                                        autoComplete="off"
-                                        placeholder="信箱網域"
-                                        required
-                                    />
+                                    {account}
                                 </div>
-                                {checkMessage && (
-                                    <div className={`check-message ${checkMessage.includes('✅') ? 'success' : 'error'}`}>
-                                        {checkMessage}
-                                    </div>
-                                )}
                             </div>
 
                             <div className="form-group">
@@ -185,15 +167,7 @@ function Register() {
 
                             <div className="form-group">
                                 <label htmlFor="name">姓名</label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    value={cname}
-                                    onChange={(e) => setCname(e.target.value)}
-                                    autoComplete="off"
-                                    placeholder="請輸入您的姓名"
-                                    required
-                                />
+                                {Cname}
                             </div>
 
                             <div className="form-group">
@@ -230,4 +204,4 @@ function Register() {
     )
 }
 
-export default Register
+export default GoogleRegister;

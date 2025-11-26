@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 function GoogleLoginButton() {
     const navigate = useNavigate();
-    
+
     // ⚠️ 請替換成你實際的 Google Client ID
     const clientId = "494235280467-1u61vd7vgnslc7bnducg7k49s16v66mr.apps.googleusercontent.com";
 
@@ -21,9 +21,15 @@ function GoogleLoginButton() {
             });
 
             const data = await response.json();
-            
+
             if (data.success) {
                 navigate('/member');
+            } else if (data.needRegister) {
+                navigate("/googleRegister", {
+                    state: {
+                        registerToken: data.registerToken
+                    }
+                });
             } else {
                 alert('登入失敗: ' + data.message);
             }
@@ -38,17 +44,20 @@ function GoogleLoginButton() {
 
     return (
         <GoogleOAuthProvider clientId={clientId}>
-            <GoogleLogin
-                onSuccess={handleSuccess}
-                onError={handleError}
-                text="signin_with"
-                shape="rectangular"
-                theme="outline"
-                size="large"
-                locale="zh_TW"
-                useOneTap={false}
-                use_fedcm_for_prompt={true}
-            />
+            <div style={{ width: '100%' }}>
+                <GoogleLogin
+                    onSuccess={handleSuccess}
+                    onError={handleError}
+                    text="signin_with"
+                    shape="rectangular"
+                    theme="outline"
+                    size="large"
+                    locale="zh_TW"
+                    width="100%"
+                    useOneTap={false}
+                    use_fedcm_for_prompt={true}
+                />
+            </div>
         </GoogleOAuthProvider>
     );
 }

@@ -1,169 +1,326 @@
-/* 全域樣式 */
+/* Google Material Symbols 字體 */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+/* 全域樣式重置 */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* 註冊頁面容器 */
+.register-page {
+    height: 100vh;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    background: #f6f7f8;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    position: relative;
+    overflow: hidden;
+    padding: 1rem;
 }
 
-/* 註冊表單容器 */
-form {
-    background: #ffffff;
-    padding: 2.5rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* 標題 */
-form h1 {
-    color: #1a202c;
-    font-size: 1.75rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    text-align: center;
-}
-
-/* 標籤 */
-form label {
-    display: block;
-    color: #4a5568;
-    font-size: 0.875rem;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    margin-top: 1rem;
-}
-
-/* 輸入框 */
-form input[type="text"],
-form input[type="password"] {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background: #f7fafc;
-}
-
-form input[type="text"]:focus,
-form input[type="password"]:focus {
-    outline: none;
-    border-color: #667eea;
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-/* 提交按鈕 */
-form input[type="submit"] {
-    width: 100%;
-    padding: 0.875rem;
-    margin-top: 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
+/* 深色模式切換按鈕 */
+.dark-mode-toggle {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-form input[type="submit"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+.dark-mode-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-form input[type="submit"]:active {
-    transform: translateY(0);
-}
-
-/* 檢查訊息 */
-.check-msg {
-    min-height: 1.25rem;
-    font-size: 0.875rem;
-    color: #e53e3e;
-    margin-top: 0.25rem;
-    transition: all 0.3s ease;
-}
-
-.check-msg:empty {
-    margin-top: 0;
-}
-
-/* 分隔線 */
-form hr {
-    margin: 1.5rem 0;
-    border: none;
-    border-top: 1px solid #e2e8f0;
-}
-
-/* 訊息文字 */
-form p {
-    text-align: center;
-    color: #718096;
-    font-size: 0.875rem;
-    margin-top: 1rem;
-}
-
-form p a {
-    color: #667eea;
-    text-decoration: none;
-    font-weight: 500;
+.dark-mode-toggle .material-symbols-outlined {
+    font-size: 1.5rem;
+    color: #64748b;
     transition: color 0.3s ease;
 }
 
-form p a:hover {
-    color: #764ba2;
+.dark-mode-toggle:hover .material-symbols-outlined {
+    color: #197fe6;
+    padding: 1rem;
+}
+
+.register-container {
+    width: 100%;
+    max-width: 28rem;
+}
+
+.register-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 標題區域 */
+.register-header {
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.register-header h1 {
+    color: #0e141b;
+    font-size: 1.875rem;
+    font-weight: 900;
+    letter-spacing: -0.033em;
+    margin-bottom: 0.25rem;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* 表單樣式 */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.form-group label {
+    color: #0e141b;
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+/* 一般輸入框 */
+.form-group input[type="text"],
+.form-group input[type="password"] {
+    width: 100%;
+    height: 2.75rem;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.25rem;
+    font-size: 0.9375rem;
+    background: #f6f7f8;
+    color: #0e141b;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #197fe6;
+    background: white;
+}
+
+.form-group input::placeholder {
+    color: #94a3b8;
+}
+
+/* Email 輸入群組 */
+.email-input-group {
+    display: flex;
+    align-items: center;
+}
+
+.email-input-left {
+    flex: 1;
+    border-radius: 0.25rem 0 0 0.25rem !important;
+    border-right: none !important;
+}
+
+.email-separator {
+    display: flex;
+    align-items: center;
+    height: 2.75rem;
+    padding: 0 0.75rem;
+    background: #f6f7f8;
+    border-top: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+    color: #64748b;
+    font-size: 0.9375rem;
+}
+
+.email-input-right {
+    flex: 1;
+    border-radius: 0 0.25rem 0.25rem 0 !important;
+    border-left: none !important;
+}
+
+/* 檢查訊息 - 固定高度空間 */
+.check-message {
+    font-size: 0.8125rem;
+    min-height: 1.125rem;
+    height: 1.125rem;
+    display: flex;
+    align-items: center;
+}
+
+.check-message.success {
+    color: #16a34a;
+}
+
+.check-message.error {
+    color: #dc2626;
+}
+
+/* 密碼輸入框容器 */
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper input {
+    padding-right: 3rem;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+    color: #197fe6;
+}
+
+.toggle-password .material-symbols-outlined {
+    font-size: 1.5rem;
+}
+
+/* 下拉選單 */
+.location-select {
+    width: 100%;
+    height: 2.75rem;
+    padding: 0.625rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.25rem;
+    font-size: 0.9375rem;
+    background: #f6f7f8;
+    color: #0e141b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.125rem;
+    padding-right: 2.5rem;
+}
+
+.location-select:focus {
+    outline: none;
+    border-color: #197fe6;
+    background-color: white;
+}
+
+.location-select option {
+    padding: 0.5rem;
+}
+
+/* 主要按鈕 */
+.btn-primary {
+    width: 100%;
+    height: 2.75rem;
+    padding: 0 1.5rem;
+    background: #197fe6;
+    color: white;
+    border: none;
+    border-radius: 9999px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    margin-top: 0.25rem;
+}
+
+.btn-primary:hover {
+    background: #1570cc;
+}
+
+.btn-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(25, 127, 230, 0.1);
+}
+
+/* 登入連結 */
+.login-link {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.8125rem;
+    margin-top: 0.25rem;
+}
+
+.login-link a {
+    color: #197fe6;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 0.25rem;
+    transition: color 0.2s ease;
+}
+
+.login-link a:hover {
+    color: #1570cc;
+    text-decoration: underline;
 }
 
 /* 提示條 (Alert Bar) */
 .alert-bar {
     position: fixed;
-    top: 80px;
+    top: 5rem;
     left: 50%;
     transform: translateX(-50%);
     padding: 1rem 1.5rem;
-    border-radius: 12px;
+    border-radius: 0.75rem;
     color: white;
     font-weight: 500;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     opacity: 0;
     animation: slideDown 3s ease;
     z-index: 1000;
-    min-width: 300px;
+    min-width: 20rem;
     text-align: center;
 }
 
 /* 成功樣式 */
 .alert-bar.success {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    background: #16a34a;
 }
 
 /* 錯誤樣式 */
 .alert-bar.error {
-    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    background: #dc2626;
 }
 
 /* 動畫效果 */
@@ -182,19 +339,192 @@ form p a:hover {
     }
 }
 
-/* 響應式設計 */
-@media (max-width: 480px) {
-    form {
-        padding: 2rem 1.5rem;
-        margin: 1rem;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.register-card {
+    animation: fadeIn 0.5s ease;
+}
+
+/* 響應式設計 - 平板 */
+@media (max-width: 768px) {
+    .register-card {
+        padding: 1.5rem;
     }
     
-    form h1 {
-        font-size: 1.5rem;
+    .register-header h1 {
+        font-size: 2rem;
+    }
+}
+
+/* 響應式設計 - 手機 */
+@media (max-width: 480px) {
+    .register-page {
+        padding: 0.5rem;
+    }
+    
+    .register-card {
+        padding: 1.25rem;
+    }
+    
+    .register-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .location-select,
+    .btn-primary {
+        height: 3rem;
+        font-size: 0.9375rem;
+    }
+    
+    .email-separator {
+        height: 3rem;
+        padding: 0 0.5rem;
     }
     
     .alert-bar {
-        min-width: 280px;
+        min-width: 16rem;
         padding: 0.875rem 1.25rem;
+    }
+}
+
+
+/* 深色模式樣式 */
+.dark .register-page {
+    background: #111921;
+}
+
+.dark .dark-mode-toggle {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.dark .dark-mode-toggle .material-symbols-outlined {
+    color: #94a3b8;
+}
+
+.dark .dark-mode-toggle:hover .material-symbols-outlined {
+    color: #197fe6;
+}
+
+.dark .register-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+.dark .register-header h1 {
+    color: #f1f5f9;
+}
+
+.dark .subtitle {
+    color: #94a3b8;
+}
+
+.dark .form-group label {
+    color: #f1f5f9;
+}
+
+.dark .form-group input[type="text"],
+.dark .form-group input[type="password"],
+.dark .location-select {
+    background: rgba(15, 23, 42, 0.5);
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+.dark .form-group input:focus,
+.dark .location-select:focus {
+    background: #111921;
+    border-color: #197fe6;
+}
+
+.dark .form-group input::placeholder {
+    color: #64748b;
+}
+
+.dark .email-separator {
+    background: rgba(15, 23, 42, 0.5);
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+.dark .check-message.success {
+    color: #4ade80;
+}
+
+.dark .check-message.error {
+    color: #f87171;
+}
+
+.dark .toggle-password {
+    color: #94a3b8;
+}
+
+.dark .login-link {
+    color: #94a3b8;
+}
+/* 深色模式支援 (可選) */
+@media (prefers-color-scheme: dark) {
+    .register-page {
+        background: #111921;
+    }
+    
+    .register-card {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    
+    .register-header h1 {
+        color: #f1f5f9;
+    }
+    
+    .subtitle {
+        color: #94a3b8;
+    }
+    
+    .form-group label {
+        color: #f1f5f9;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .location-select {
+        background: rgba(15, 23, 42, 0.5);
+        border-color: #334155;
+        color: #f1f5f9;
+    }
+    
+    .form-group input:focus,
+    .location-select:focus {
+        background: #111921;
+        border-color: #197fe6;
+    }
+    
+    .form-group input::placeholder {
+        color: #64748b;
+    }
+    
+    .email-separator {
+        background: rgba(15, 23, 42, 0.5);
+        border-color: #334155;
+        color: #94a3b8;
+    }
+    
+    .toggle-password {
+        color: #94a3b8;
+    }
+    
+    .login-link {
+        color: #94a3b8;
     }
 }

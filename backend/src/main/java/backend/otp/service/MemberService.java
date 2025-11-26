@@ -23,6 +23,7 @@ public class MemberService {
         }
 
         member.setPassword(BCrypt.hashpw(member.getPassword(), BCrypt.gensalt()));
+        member.setRole(2);
         Member saveMember = repository.save(member);
 
         return saveMember != null;
@@ -37,15 +38,10 @@ public class MemberService {
         return repository.findByAccount(account).orElse(null);
     }
 
-    // 在 MemberService 類別中新增這個方法
-    public boolean registerOAuth(Member member) {
-        if (repository.existsByAccount(member.getAccount())) {
-            return false;
-        }
-
-        // OAuth 註冊不需要加密密碼,直接儲存
-        Member saveMember = repository.save(member);
-        return saveMember != null;
+    public Integer findRoleByAccount (String account) {
+        return repository.findRoleByAccount(account);
     }
+
+    
 
 }

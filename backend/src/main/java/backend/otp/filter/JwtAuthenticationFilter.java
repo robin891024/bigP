@@ -1,9 +1,11 @@
 package backend.otp.filter;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -30,11 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 跳過公開端點，不進行 JWT 驗證
         String path = request.getRequestURI();
-        if (path.equals("/member/login") ||
-            path.equals("/member/register") ||
-            path.equals("/member/checkAc") ||
-            path.equals("/member/verify") ||
-            path.startsWith("/oauth2/")) {
+        if (path.equals("/member/login")
+                || path.equals("/member/register")
+                || path.equals("/member/checkAc")
+                || path.equals("/member/verify")
+                || path.startsWith("/oauth2/")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -47,24 +49,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwt != null && jwtUtils.validateToken(jwt)) {
                 // 從 token 中取得使用者名稱
                 String username = jwtUtils.getUsernameFromToken(jwt);
+                Integer role = jwtUtils.getRoleFromToken(jwt);  // ★ 從 JWT 取出 role
+
+                // ★ 數字 role 轉成 Spring Security 需要的 Authority 字串
+                String authority = switch (role) {
+                    case 0 ->
+                        "ROLE_DEVELOPER";
+                    case 1 ->
+                        "ROLE_ADMIN";
+                    case 2 ->
+                        "ROLE_USER";
+                    default ->
+                        "ROLE_GUEST";
+                };
 
                 // 建立認證物件
-                UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                        username,
-                        null,
-                        null  // 這裡可以加入權限，目前先設為 null
-                    );
+                UsernamePasswordAuthenticationToken authentication
+                        = new UsernamePasswordAuthenticationToken(
+                                username,
+                                null,
+                                List.of(new SimpleGrantedAuthority(authority)) // 這裡可以加入權限，目前先設為 null
+                        );
 
                 authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
+                        new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
                 // 將認證資訊設定到 SecurityContext
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            logger.error("無法設定使用者認證: {}", e);
+            logger.error("無法設定使用者認證: " + e.getMessage(), e);
         }
 
         // 繼續執行過濾鏈
@@ -76,7 +91,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     private String getJwtFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        
+
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("jwt".equals(cookie.getName())) {
@@ -84,7 +99,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }
-        
+
         return null;
     }
 }
