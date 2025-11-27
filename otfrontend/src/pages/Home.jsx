@@ -6,12 +6,15 @@ import AnnouncementList from "../components/AnnouncementList";
 import Footer from "../components/Footer";
 import Top from "../components/ui/Top";
 import AnnoView from '../components/AnnoView';
+import useSessionTracker from "../hooks/useSessionTracker";
 
 
 export default function Home() {
   
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
+  // 這將在 Home 元件 mount 時自動執行 Session 邏輯和後端呼叫
+  useSessionTracker('homepage');
   return (
     <div className="font-sans min-h-screen flex flex-col">
       <Header />
