@@ -40,7 +40,7 @@
         public String EventIntro(Long eventId) {
             String sql = "SELECT content FROM event_detail WHERE event_id = ?";
             try {
-                return jdbcTemplate.queryForObject(sql, new Object[]{eventId}, String.class);
+                return jdbcTemplate.queryForObject(sql, String.class, eventId);
             } catch (Exception e) {
                 return null;
             }
