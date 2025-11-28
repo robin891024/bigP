@@ -5,7 +5,7 @@ import "../Css/Register.css";
 function RevisePage() {
     const { field } = useParams();
     const navigate = useNavigate();
-    
+
     const [currentValue, setCurrentValue] = useState("");
     const [newValue, setNewValue] = useState("");
     const [confirmValue, setConfirmValue] = useState("");
@@ -36,6 +36,12 @@ function RevisePage() {
             currentLabel: "目前居住地",
             newLabel: "新居住地",
             type: "select"
+        },
+        tel: {
+            title: "修改電話",
+            currentLabel: "目前電話",
+            newLabel: "新電話",
+            type: "tel"
         }
     };
 
@@ -60,6 +66,8 @@ function RevisePage() {
                 } else if (field === 'city') {
                     setCurrentValue(data.city);
                     setLocation(data.city);
+                } else if (field === 'tel') {
+                    setCurrentValue(data.tel);
                 }
             })
             .catch(() => {
@@ -80,8 +88,16 @@ function RevisePage() {
 
         // 驗證
         if (field === 'password') {
-            if (!currentValue || !newValue || !confirmValue) {
+            if (!currentPassword) {
+                showAlert("⚠️ 請輸入當前密碼以確認身份", "error");
+                return;
+            }
+            if (!newValue || !confirmValue) {
                 showAlert("⚠️ 請完整填寫所有欄位", "error");
+                return;
+            }
+            if (newValue == currentPassword) {
+                showAlert("⚠️ 新密碼與舊密碼相同", "error");
                 return;
             }
             if (newValue !== confirmValue) {
@@ -110,16 +126,63 @@ function RevisePage() {
                 showAlert("⚠️ 請選擇居住地", "error");
                 return;
             }
+        } else if (field === 'tel') {
+            if (!currentPassword) {
+                showAlert("⚠️ 請輸入當前密碼以確認身份", "error");
+                return;
+            }
+            if (!newValue.trim()) {
+                showAlert("⚠️ 請輸入新電話", "error");
+                return;
+            }
+            // 驗證電話格式 (台灣手機號碼格式)
+            const telPattern = /^09\d{8}$/;
+            if (!telPattern.test(newValue.trim())) {
+                showAlert("⚠️ 請輸入有效的手機號碼格式 (09xxxxxxxx)", "error");
+                return;
+            }
         }
 
         try {
-            // 這裡需要實作後端 API
-            // 暫時顯示成功訊息
-            showAlert("🎉 修改成功！", "success");
-            
-            setTimeout(() => {
-                navigate('/member/info');
-            }, 1500);
+            const res = await fetch("http://localhost:8080/member/passwordVerify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({
+                    password: currentPassword
+                }),
+            })
+
+            const data = await res.json();
+            if (data.success) {
+
+                const request = await fetch("http://localhost:8080/member/revise", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        password: field === 'password' ? newValue : null,
+                        name: field === 'name' ? newValue : null,
+                        city: field === 'city' ? location : null,
+                        tel: field === 'tel' ? newValue : null
+                    }),
+                })
+
+                const reviseData = await request.json();
+
+                if (reviseData.success) {
+                    showAlert("🎉 修改成功！", "success");
+
+                    setTimeout(() => {
+                        navigate('/member/info');
+                    }, 1500);
+                }else {
+                    showAlert("❌ 修改失敗，請稍後再試", "error");
+                }
+
+            } else {
+                showAlert("❌ 密碼錯誤", "error");
+            }
         } catch (err) {
             showAlert("❌ 修改失敗，請稍後再試", "error");
         }
@@ -152,8 +215,8 @@ function RevisePage() {
                                         <input
                                             type={showCurrentPassword ? "text" : "password"}
                                             id="currentPassword"
-                                            value={field === 'password' ? currentValue : currentPassword}
-                                            onChange={(e) => field === 'password' ? setCurrentValue(e.target.value) : setCurrentPassword(e.target.value)}
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
                                             placeholder="請輸入當前密碼以確認身份"
                                             required
                                         />
@@ -263,10 +326,29 @@ function RevisePage() {
                                     </div>
                                 )}
 
+                                {/* 電話欄位 */}
+                                {field === 'tel' && (
+                                    <div className="form-group">
+                                        <label htmlFor="new">{config.newLabel}</label>
+                                        <input
+                                            type="tel"
+                                            id="new"
+                                            value={newValue}
+                                            onChange={(e) => setNewValue(e.target.value)}
+                                            placeholder="請輸入新電話 (09xxxxxxxx)"
+                                            pattern="09\d{8}"
+                                            required
+                                        />
+                                        <small style={{ color: '#6c757d', fontSize: '0.875rem' }}>
+                                            請輸入台灣手機號碼格式，例如：0912345678
+                                        </small>
+                                    </div>
+                                )}
+
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    <button 
-                                        type="button" 
-                                        className="btn-primary" 
+                                    <button
+                                        type="button"
+                                        className="btn-primary"
                                         onClick={() => navigate('/member/info')}
                                         style={{ backgroundColor: '#6c757d' }}
                                     >

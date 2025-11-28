@@ -14,15 +14,16 @@
 
 /* 註冊頁面容器 */
 .register-page {
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #f6f7f8;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
     position: relative;
-    overflow: hidden;
-    padding: 1rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 2rem 1rem;
 }
 
 /* 深色模式切換按鈕 */
@@ -63,6 +64,7 @@
 .register-container {
     width: 100%;
     max-width: 28rem;
+    margin: auto;
 }
 
 .register-card {
@@ -71,6 +73,7 @@
     border-radius: 0.75rem;
     padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin: 1rem 0;
 }
 
 /* 標題區域 */
@@ -166,13 +169,14 @@ form {
     border-left: none !important;
 }
 
-/* 檢查訊息 - 固定高度空間 */
+/* 檢查訊息 */
 .check-message {
     font-size: 0.8125rem;
     min-height: 1.125rem;
-    height: 1.125rem;
     display: flex;
     align-items: center;
+    margin-top: 0.25rem;
+    line-height: 1.3;
 }
 
 .check-message.success {
@@ -356,8 +360,13 @@ form {
 
 /* 響應式設計 - 平板 */
 @media (max-width: 768px) {
+    .register-page {
+        padding: 1.5rem 1rem;
+    }
+    
     .register-card {
         padding: 1.5rem;
+        margin: 0.5rem 0;
     }
     
     .register-header h1 {
@@ -368,11 +377,12 @@ form {
 /* 響應式設計 - 手機 */
 @media (max-width: 480px) {
     .register-page {
-        padding: 0.5rem;
+        padding: 1rem 0.5rem;
     }
     
     .register-card {
         padding: 1.25rem;
+        margin: 0.5rem 0;
     }
     
     .register-header h1 {

@@ -29,6 +29,19 @@ public class MemberService {
         return saveMember != null;
     }
 
+    public boolean revise (Member member) {
+
+        Member reviseMember = repository.save(member);
+
+        return reviseMember != null;
+    }
+
+    public String findPassword (String account) {
+        String password = repository.findPasswordByAccount(account);
+
+        return password;
+    }
+
     public boolean login(String account, String password) {
         Member member = repository.findByAccount(account).orElse(null);
         return member != null && BCrypt.checkpw(password, member.getPassword());

@@ -11,6 +11,8 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Component
 public class JWTutils {
@@ -81,5 +83,27 @@ public class JWTutils {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    private String getJwtFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public boolean JWTtoken (HttpServletRequest request) {
+
+        String jwtToken = getJwtFromCookie(request);
+
+        return jwtToken != null && validateToken(jwtToken);
+
     }
 }

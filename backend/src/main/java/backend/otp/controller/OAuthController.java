@@ -157,6 +157,7 @@ public class OAuthController {
             member.setName(name);
             member.setCity(city);
             member.setPassword(request.get("password"));
+            member.setTel(request.get("tel"));
 
             memberService.register(member);
 
@@ -176,6 +177,7 @@ public class OAuthController {
 
             res.put("success", true);
             res.put("message", "Register + login success");
+            res.put("user", Map.of("email", email, "name", name));
 
             return ResponseEntity.ok(res);
 

@@ -10,6 +10,10 @@ function GoogleRegister() {
     const registerToken = locationdata.state?.registerToken;
     const [account, setAccount] = useState("");
     const [Cname, setCName] = useState("");
+    
+    // 驗證錯誤訊息狀態
+    const [passwordError, setPasswordError] = useState("");
+    const [telError, setTelError] = useState("");
 
     useEffect(() => {
         if (!registerToken) {
@@ -46,6 +50,7 @@ function GoogleRegister() {
 
     const [password, setPassword] = useState("");
     const [location, setLocation] = useState("");
+    const [tel, setTel] = useState("");
     const [alertMsg, setAlertMsg] = useState("");
     const [alertType, setAlertType] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -59,11 +64,56 @@ function GoogleRegister() {
         }, 3000)
     }
 
+    // 驗證密碼（只能有大小寫英數字且長度需在6~20字之間）
+    const validatePassword = (value) => {
+        const regex = /^[a-zA-Z0-9]{6,20}$/;
+        if (!value) {
+            setPasswordError("請輸入密碼");
+            return false;
+        }
+        if (!regex.test(value)) {
+            if (value.length < 6 || value.length > 20) {
+                setPasswordError("密碼長度必須在6~20字之間");
+            } else {
+                setPasswordError("密碼只能包含英文字母和數字");
+            }
+            return false;
+        }
+        setPasswordError("");
+        return true;
+    };
+
+    // 驗證台灣電話號碼
+    const validateTel = (value) => {
+        // 支援市話（02-12345678、04-12345678等）和手機（09xx-xxxxxx 或 09xxxxxxxx）
+        const regex = /^(0\d{1,2}-?\d{7,8}|09\d{2}-?\d{6})$/;
+        if (!value) {
+            setTelError("請輸入電話號碼");
+            return false;
+        }
+        if (!regex.test(value)) {
+            setTelError("請輸入有效的台灣電話號碼（例如：02-12345678 或 0912-345678）");
+            return false;
+        }
+        setTelError("");
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!password || !location) {
+        // 執行所有驗證
+        const isPasswordValid = validatePassword(password);
+        const isTelValid = validateTel(tel);
+
+        if (!password || !location || !tel) {
             showAlert("⚠️ 請完整填寫資料", "error");
+            return;
+        }
+
+        // 如果任何驗證失敗，不提交表單
+        if (!isPasswordValid || !isTelValid) {
+            showAlert("⚠️ 請修正表單錯誤後再提交", "error");
             return;
         }
 
@@ -74,7 +124,8 @@ function GoogleRegister() {
                 body: JSON.stringify({
                     token: registerToken,
                     password,
-                    city: location || ""
+                    city: location,
+                    tel: tel
                 }),
             });
 
@@ -86,6 +137,7 @@ function GoogleRegister() {
                 showAlert("🎉 google註冊成功！", "success");
                 setPassword("");
                 setLocation("");
+                setTel("");
 
                 setTimeout(() => {
                     navigate("/member");
@@ -147,9 +199,13 @@ function GoogleRegister() {
                                         type={showPassword ? "text" : "password"}
                                         id="password"
                                         value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        onBlur={(e) => validatePassword(e.target.value)}
+                                        onChange={(e) => {
+                                            setPassword(e.target.value);
+                                            if (passwordError) validatePassword(e.target.value);
+                                        }}
                                         autoComplete="off"
-                                        placeholder="請輸入您的密碼"
+                                        placeholder="請輸入您的密碼（6-20位英數字）"
                                         required
                                     />
                                     <button
@@ -163,6 +219,11 @@ function GoogleRegister() {
                                         </span>
                                     </button>
                                 </div>
+                                {passwordError && (
+                                    <div className="check-message error">
+                                        {passwordError}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="form-group">
@@ -186,6 +247,28 @@ function GoogleRegister() {
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="tel">電話</label>
+                                <input
+                                    type="text"
+                                    id="tel"
+                                    value={tel}
+                                    onBlur={(e) => validateTel(e.target.value)}
+                                    onChange={(e) => {
+                                        setTel(e.target.value);
+                                        if (telError) validateTel(e.target.value);
+                                    }}
+                                    autoComplete="off"
+                                    placeholder="請輸入您的電話（例如：02-12345678）"
+                                    required
+                                />
+                                {telError && (
+                                    <div className="check-message error">
+                                        {telError}
+                                    </div>
+                                )}
                             </div>
 
                             <button type="submit" className="btn-primary">

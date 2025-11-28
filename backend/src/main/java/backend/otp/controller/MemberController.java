@@ -13,24 +13,26 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import backend.otp.dto.MemberDto;
+import backend.otp.dto.MemberReviseDto;
 import backend.otp.entity.Member;
 import backend.otp.service.MemberService;
+import backend.otp.utils.BCrypt;
 import backend.otp.utils.JWTutils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-
-
 
 @RestController
 @RequestMapping("/member")
 public class MemberController {
-    
+
     @Autowired
     private NamedParameterJdbcTemplate jdbc;
 
@@ -41,7 +43,7 @@ public class MemberController {
     private JWTutils jwt;
 
     @GetMapping("/findAll")
-    public List<Map<String, Object>> list () {
+    public List<Map<String, Object>> list() {
         String sql = "SELECT * FROM member";
         return jdbc.queryForList(sql, new HashMap<>());
     }
@@ -51,8 +53,8 @@ public class MemberController {
     public ResponseEntity<MemberDto> getProfile() {
 
         String account = SecurityContextHolder.getContext()
-            .getAuthentication()
-            .getName();
+                .getAuthentication()
+                .getName();
 
         Member member = service.findByAccount(account);
 
@@ -62,52 +64,52 @@ public class MemberController {
         dto.setName(member.getName());
         dto.setRole(member.getRole());
         dto.setCity(member.getCity());
+        dto.setTel(member.getTel());
 
         return ResponseEntity.ok(dto);
     }
-    
-    
+
     @GetMapping("/checkAc")
-    public ResponseEntity<Boolean> checkAc (@RequestParam String account) {
-        
+    public ResponseEntity<Boolean> checkAc(@RequestParam String account) {
+
         boolean isExist = service.checkAc(account);
 
         return ResponseEntity.ok(isExist);
     }
-    
+
     @PostMapping("/register")
-    public ResponseEntity<Map<String, Boolean>> register (@RequestBody Member member) {
-        
+    public ResponseEntity<Map<String, Boolean>> register(@RequestBody Member member) {
+
         Map<String, Boolean> map = new HashMap<>();
 
         map.put("success", service.register(member));
 
         return ResponseEntity.ok(map);
     }
-    
+
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(
-        @RequestParam String account, 
-        @RequestParam String password,
-        HttpServletResponse response) {
+            @RequestParam String account,
+            @RequestParam String password,
+            HttpServletResponse response) {
 
         Map<String, Object> body = new HashMap<>();
 
         boolean success = service.login(account, password);
 
         if (success) {
-            
+
             Integer role = service.findRoleByAccount(account);
 
             String token = jwt.generateToken(account, role);
 
             ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                .httpOnly(true)          // 前端 JS 無法讀取
-                .secure(false)           // 若部署 HTTPS，請改成 true
-                .path("/")               // 整個網站都能用
-                .maxAge(60 * 60)         // 一小時
-                .sameSite("Lax")         // 防止 CSRF
-                .build();
+                    .httpOnly(true) // 前端 JS 無法讀取
+                    .secure(false) // 若部署 HTTPS，請改成 true
+                    .path("/") // 整個網站都能用
+                    .maxAge(60 * 60) // 一小時
+                    .sameSite("Lax") // 防止 CSRF
+                    .build();
 
             response.addHeader("Set-Cookie", cookie.toString());
 
@@ -119,11 +121,11 @@ public class MemberController {
             body.put("message", "帳號或密碼錯誤");
             return ResponseEntity.ok(body);
         }
-        
+
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<Map<String, Object>> verity (@CookieValue(value = "jwt", required = false) String token) {
+    public ResponseEntity<Map<String, Object>> verity(@CookieValue(value = "jwt", required = false) String token) {
         Map<String, Object> body = new HashMap<>();
 
         if (token == null || token.isEmpty()) {
@@ -141,23 +143,93 @@ public class MemberController {
         } catch (Exception e) {
             System.err.println("JWT 驗證錯誤: " + e.getMessage());
         }
-         body.put("authenticated", false);
+        body.put("authenticated", false);
         return ResponseEntity.ok(body);
     }
-    
+
     @PostMapping("/logout")
-    public ResponseEntity<Boolean> logout (HttpServletResponse response) {
+    public ResponseEntity<Boolean> logout(HttpServletResponse response) {
 
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
-                .httpOnly(true)          // 前端 JS 無法讀取
-                .secure(false)           // 若部署 HTTPS，請改成 true
-                .path("/")               // 整個網站都能用
-                .maxAge(0)         // 一小時
-                .sameSite("Lax")         // 防止 CSRF
+                .httpOnly(true) // 前端 JS 無法讀取
+                .secure(false) // 若部署 HTTPS，請改成 true
+                .path("/") // 整個網站都能用
+                .maxAge(0) // 一小時
+                .sameSite("Lax") // 防止 CSRF
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());
-        
+
         return ResponseEntity.ok(true);
+    }
+
+    @PostMapping("/passwordVerify")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Map<String, Boolean>> passwordVerify(@RequestBody Map<String, String> req, HttpServletRequest request) {
+
+        String jwtToken = getJwtFromCookie(request);
+        Map<String, Boolean> map = new HashMap<>();
+
+        if (jwtToken != null && jwt.validateToken(jwtToken)) {
+            String account = jwt.getUsernameFromToken(jwtToken);
+
+            map.put("success", BCrypt.checkpw(req.get("password"), service.findPassword(account))); 
+            return ResponseEntity.ok(map);
+        } else {
+            map.put("success", false);
+            return ResponseEntity.ok(map);
+        }
+
+    }
+
+    @PutMapping("/revise")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Map<String, Boolean>> revise(@RequestBody MemberReviseDto dto, HttpServletRequest request) {
+
+        String jwtToken = getJwtFromCookie(request);
+        Map<String, Boolean> map = new HashMap<>();
+
+        if (jwtToken != null && jwt.validateToken(jwtToken)) {
+            String account = jwt.getUsernameFromToken(jwtToken);
+
+            Member member = service.findByAccount(account);
+            if (member == null) {
+                map.put("success", false);
+                return ResponseEntity.ok(map);
+            }
+
+            if (dto.getName() != null) {
+                member.setName(dto.getName());
+            }
+            if (dto.getCity() != null) {
+                member.setCity(dto.getCity());
+            }
+            if (dto.getTel() != null) {
+                member.setTel(dto.getTel());
+            }
+            if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+                member.setPassword(BCrypt.hashpw(dto.getPassword(), BCrypt.gensalt()));
+            }
+
+            map.put("success", service.revise(member));
+        } else {
+            map.put("success", false);
+        }
+
+        return ResponseEntity.ok(map);
+    }
+
+    private String getJwtFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 }

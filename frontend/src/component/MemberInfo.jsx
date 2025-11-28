@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Calendar from "./Calendar";
 
 function MemberInfo() {
     const navigate = useNavigate();
@@ -7,6 +8,7 @@ function MemberInfo() {
     const [account, setAccount] = useState("Loading...");
     const [city, setCity] = useState("Loading...");
     const [name, setName] = useState("Loading...");
+    const [tel, setTel] = useState("Loading...");
 
     useEffect(() => {
         fetch("http://localhost:8080/member/profile", {
@@ -19,9 +21,11 @@ function MemberInfo() {
                 return res.json();
             })
             .then(data => {
+                console.log(data)
                 setAccount(data.account);
                 setName(data.name);
-                setCity(data.city)
+                setCity(data.city);
+                setTel(data.tel);
             })
             .catch(() => {
                 setMessage('無法載入會員資料');
@@ -99,14 +103,28 @@ function MemberInfo() {
                                 <span>修改</span>
                             </button>
                         </div>
+
+                        {/* 電話 */}
+                        <div className="info-item">
+                            <div className="info-item-content">
+                                <div className="info-icon">
+                                    <span className="material-symbols-outlined">call</span>
+                                </div>
+                                <div className="info-details">
+                                    <p className="info-label">電話</p>
+                                    <p className="info-value">{tel}</p>
+                                </div>
+                            </div>
+                            <button className="edit-button" onClick={() => navigate('/member/revise/tel')}>
+                                <span>修改</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {/* 行事曆卡片 */}
                 <div className="calendar-card">
-                    <div className="calendar-placeholder">
-                        <p>行事曆</p>
-                    </div>
+                    <Calendar />
                 </div>
 
                 {/* Debug 訊息 (可選) */}

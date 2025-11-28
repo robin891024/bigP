@@ -10,10 +10,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "member")
+@Table(name = "user")
 @Getter
 @Setter
 public class Member {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,10 +25,13 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = true)
+    @Column(name = "username", nullable = true)
     private String name;
 
     private Integer role;
 
+    @Column(name = "address")
     private String city;
+
+    private String tel;
 }
