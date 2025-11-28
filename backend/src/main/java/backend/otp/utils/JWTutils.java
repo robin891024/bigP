@@ -99,7 +99,7 @@ public class JWTutils {
         return null;
     }
 
-    public boolean JWTtoken (HttpServletRequest request) {
+    public boolean JWTtokenValid (HttpServletRequest request) {
 
         String jwtToken = getJwtFromCookie(request);
 
