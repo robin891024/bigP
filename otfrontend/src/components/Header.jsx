@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; 
 import { Button } from "@/components/ui/button";
-import { Search, Menu, X } from 'lucide-react'; // 引入 Menu 和 X 圖標
+import { Search, Menu, X } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 function Header({ showSearchBar = false }) {
-  // 用於管理移動端選單的開/關狀態
+  // *********** 模擬登入狀態：使用 會員名稱 ***********
+  const { isLoggedIn, userName, logout } = useAuth();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // 搜尋欄狀態（桌面與行動共用）
   const [searchValue, setSearchValue] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const navigate = useNavigate();
@@ -14,7 +16,18 @@ function Header({ showSearchBar = false }) {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-  
+
+  const handleAuthClick = () => {
+    setIsMenuOpen(false);
+    if (isLoggedIn) {
+      logout(); 
+      navigate("/");
+    } else {
+      navigate("/login");
+    }
+  };
+
+
 
   const primaryNavLinks = (
     <>
@@ -27,20 +40,16 @@ function Header({ showSearchBar = false }) {
     <header className="sticky top-0 z-50 bg-text text-bg shadow-lg font-sans">
       <div className="flex justify-between items-center max-w-7xl mx-auto px-6 py-3">
         
-        {/* 左側群組：Logo + 主要連結 */}
+        {/* 桌面端導航區塊 (保持不變) */}
         <div className="flex items-center space-x-6">
-            {/* Logo 連結到首頁 (始終顯示) */}
-            <Link to="/" className="text-2xl font-extrabold text-primary font-sans" onClick={() => setIsMenuOpen(false)}>OpenTicket</Link>
-
-            {/* 桌面端：主要導航 (md 螢幕以上顯示) */}
-            <nav className="hidden md:flex items-center space-x-6">
-                {primaryNavLinks}
-            </nav>
+          <Link to="/" className="text-2xl font-extrabold text-primary font-sans" onClick={() => setIsMenuOpen(false)}>OpenTicket</Link>
+          <nav className="hidden md:flex items-center space-x-6">
+              {primaryNavLinks}
+          </nav>
         </div>
 
+        {/* 桌面端右側群組 (保持不變) */}
         <div className="hidden md:flex items-center space-x-4">
-          
-          {/* 1. 搜尋欄 */}
           {showSearchBar && (
             <div className="relative w-64">
               <input
@@ -78,16 +87,20 @@ function Header({ showSearchBar = false }) {
             </div>
           )}
           
-          {/* 2. 會員資訊連結 */}
-          <Link to="/login" className="hover:underline transition duration-150">會員資訊</Link> 
+          {isLoggedIn ? (
+            <Link to="/member/info" className="hover:underline transition duration-150 font-semibold">{userName}</Link> 
+          ) : (
+             <></>
+          )}
 
-          {/* 3. 登入/註冊按鈕 */}
-          <Button variant="secondary" className="ml-2">
-            <Link to="/login" className="text-text font-semibold">登入/註冊</Link>
+          <Button variant="secondary" className="ml-2" onClick={handleAuthClick}>
+            <span className="text-text font-semibold">
+              {isLoggedIn ? '登出' : '登入/註冊'}
+            </span>
           </Button>
         </div>
 
-        {/* 移動端：漢堡選單按鈕 (md 螢幕以下顯示) */}
+        {/* 移動端：漢堡選單按鈕 (保持不變) */}
         <button 
           className="md:hidden p-2 rounded-md hover:bg-gray-800 transition"
           onClick={toggleMenu}
@@ -100,21 +113,24 @@ function Header({ showSearchBar = false }) {
 
       {/* -------------------- 移動端側邊選單 (Off-Canvas) -------------------- */}
       {isMenuOpen && (
-        // 選單背景/遮罩
         <div 
           className="fixed inset-0 bg-black/70 z-50 md:hidden" 
-          onClick={toggleMenu} // 點擊遮罩關閉選單
+          onClick={toggleMenu}
         >
           {/* 選單本體 */}
           <div 
-            className={`fixed top-0 left-0 w-3/4 h-full bg-white text-gray-900 shadow-2xl transform transition-transform duration-300 ease-in-out ${
+            className={`fixed top-0 left-0 w-3/4 h-screen overflow-y-auto bg-white text-gray-900 shadow-2xl transform transition-transform duration-300 ease-in-out ${
               isMenuOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
-            onClick={(e) => e.stopPropagation()} // 防止點擊選單內容時關閉選單
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* 選單頂部：Logo 與關閉按鈕 */}
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <Link to="/" className="text-xl font-extrabold text-primary">OpenTicket</Link>
+            
+            {/* **** 修正區塊 1: 頂部 Logo 與關閉按鈕 (保持在同一行) **** */}
+            <div className="flex justify-between items-center p-6 pb-2 border-b border-gray-200">
+              {/* Logo */}
+              <Link to="/" className="text-xl font-extrabold text-primary" onClick={() => setIsMenuOpen(false)}>OpenTicket</Link>
+              
+              {/* 關閉按鈕 */}
               <button 
                 className="p-1 rounded-full hover:bg-gray-100"
                 onClick={toggleMenu}
@@ -123,33 +139,41 @@ function Header({ showSearchBar = false }) {
                 <X size={24} className="text-gray-600" />
               </button>
             </div>
+            
+            {/* **** 修正區塊 2: 獨立的會員名稱區域 (只在登入後顯示) **** */}
+            {isLoggedIn && (
+                <Link
+                    to="/member/info" 
+                    className="block px-6 pt-4 text-xl font-semibold text-gray-700 hover:text-primary transition"
+                    onClick={() => {
+                        setIsMenuOpen(false);
+                        navigate("/member/info"); 
+                    }}
+                >
+                    {userName}
+                </Link>
+            )}
+            {/* ******************************************************** */}
 
             {/* 選單主體：連結列表 */}
-            <nav className="flex flex-col p-6 space-y-2 text-base font-medium">
-              {/* 移動端顯示所有連結，包括會員資訊 */}
+            <nav className="flex flex-col p-6 pt-4 space-y-2 text-base font-medium">
               {primaryNavLinks}
-              <Link to="/login" className="hover:underline transition duration-150 py-2" onClick={() => setIsMenuOpen(false)}>會員資訊</Link> 
+
+              {/* 注意: 這裡的 "會員資訊" 連結只有在登入前隱藏, 登入後才會顯示在列表中 (因為頂部已經有一個連結了) */}
+              {isLoggedIn && (
+                 <Link to="/member/info" className="hover:underline transition duration-150 py-2" onClick={() => setIsMenuOpen(false)}>會員資訊</Link>
+              )}
+              
               <div className="border-t border-gray-200 mt-2 pt-2">
                 <a href="mailto:contact@openticket.com" className="block hover:underline transition duration-150 py-2" onClick={() => setIsMenuOpen(false)}>聯絡信箱</a>
                 <Link to="/FAQList" className="block hover:underline transition duration-150 py-2" onClick={() => setIsMenuOpen(false)}>常見問題</Link>
                 <Link to="/Privacy" className="block hover:underline transition duration-150 py-2" onClick={() => setIsMenuOpen(false)}>Privacy</Link>
               </div>
-            
             </nav>
 
-            {/* 登入/註冊按鈕 (移動端獨有) */}
-            <div className="p-6 pt-0">
-              <Button 
-                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                }}
-              >
-                <Link to="/login" className="w-full text-white">登入/註冊</Link>
-              </Button>
-            </div>
-
-            {/* 搜尋欄 (移動端顯示) */}
+            
+            
+             {/* 搜尋欄 (移動端顯示) */}
             {showSearchBar && (
               <div className="p-6 pt-0">
                 <div className="relative">
@@ -190,6 +214,18 @@ function Header({ showSearchBar = false }) {
                 </div>
               </div>
             )}
+
+            {/* 登入/註冊 或 登出 按鈕 (移動端獨有, 保持不變) */}
+            <div className="p-6 pt-0">
+              <Button 
+                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold"
+                onClick={handleAuthClick}
+              >
+                <span className="w-full text-white">
+                  {isLoggedIn ? '登出' : '登入/註冊'}
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
       )}
