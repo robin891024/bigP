@@ -5,6 +5,7 @@ import { useTokenCheck } from "../hooks/useTokenCheck";
 import { useDarkMode } from "../hooks/useDarkMode";
 import "../Css/MemberPage.css";
 import { Route, Routes, Navigate } from "react-router-dom";
+import CollectPage from "./CollectPage";
 
 function MemberPage() {
     // 每 5 分鐘檢查一次 token 是否過期
@@ -35,6 +36,7 @@ function MemberPage() {
                                 <Route index element={<Navigate to="info" replace />} />
                                 <Route path="info" element={<MemberInfo />} />
                                 <Route path="revise/:field" element={<RevisePage />} />
+                                <Route path="wishList" element={<CollectPage />} />
                             </Routes>
                         </>
                     </div>

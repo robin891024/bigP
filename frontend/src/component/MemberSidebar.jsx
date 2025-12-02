@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 function MemberSidebar() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("info");
+    const [memberId, setMemberId] = useState("");
     const [account, setAccount] = useState("Loading...");
     const [name, setName] = useState("Loading...");
 
@@ -18,6 +19,7 @@ function MemberSidebar() {
                 return res.json();
             })
             .then(data => {
+                setMemberId(data.id),
                 setAccount(data.account),
                 setName(data.name)
             })
@@ -77,6 +79,7 @@ function MemberSidebar() {
                             onClick={(e) => {
                                 e.preventDefault();
                                 setActiveTab("info");
+                                navigate("/member/info")
                             }}
                         >
                             <span className="material-symbols-outlined">person</span>
@@ -88,6 +91,7 @@ function MemberSidebar() {
                             onClick={(e) => {
                                 e.preventDefault();
                                 setActiveTab("favorites");
+                                navigate("/member/wishList", { state: { id: memberId } });
                             }}
                         >
                             <span className="material-symbols-outlined unfilled">favorite</span>

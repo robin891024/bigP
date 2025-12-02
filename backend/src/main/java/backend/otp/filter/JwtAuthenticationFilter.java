@@ -45,45 +45,59 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 從 Cookie 中取得 JWT token
             String jwt = getJwtFromCookie(request);
 
-            // 如果有 token 且驗證通過
-            if (jwt != null && jwtUtils.validateToken(jwt)) {
-                // 從 token 中取得使用者名稱
-                String username = jwtUtils.getUsernameFromToken(jwt);
-                Integer role = jwtUtils.getRoleFromToken(jwt);  // ★ 從 JWT 取出 role
-
-                // ★ 數字 role 轉成 Spring Security 需要的 Authority 字串
-                String authority = switch (role) {
-                    case 0 ->
-                        "ROLE_DEVELOPER";
-                    case 1 ->
-                        "ROLE_ADMIN";
-                    case 2 ->
-                        "ROLE_USER";
-                    default ->
-                        "ROLE_GUEST";
-                };
-
-                // 建立認證物件
-                UsernamePasswordAuthenticationToken authentication
-                        = new UsernamePasswordAuthenticationToken(
-                                username,
-                                null,
-                                List.of(new SimpleGrantedAuthority(authority)) // 這裡可以加入權限，目前先設為 null
-                        );
-
-                authentication.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-
-                // 將認證資訊設定到 SecurityContext
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            // 如果沒有 token，返回 401
+            if (jwt == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"未提供認證 token\"}");
+                return;
             }
-        } catch (Exception e) {
-            logger.error("無法設定使用者認證: " + e.getMessage(), e);
-        }
 
-        // 繼續執行過濾鏈
-        filterChain.doFilter(request, response);
+            // 驗證 token
+            if (!jwtUtils.validateToken(jwt)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"error\": \"Token 無效或已過期\"}");
+                return;
+            }
+
+            // 從 token 中取得使用者名稱
+            String username = jwtUtils.getUsernameFromToken(jwt);
+            Integer role = jwtUtils.getRoleFromToken(jwt);  // ★ 從 JWT 取出 role
+
+            // ★ 數字 role 轉成 Spring Security 需要的 Authority 字串
+            String authority = switch (role) {
+                case 0 ->
+                    "ROLE_DEVELOPER";
+                case 1 ->
+                    "ROLE_ADMIN";
+                case 2 ->
+                    "ROLE_USER";
+                default ->
+                    "ROLE_GUEST";
+            };
+
+            // 建立認證物件
+            UsernamePasswordAuthenticationToken authentication
+                    = new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            List.of(new SimpleGrantedAuthority(authority))
+                    );
+
+            authentication.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+
+            // 將認證資訊設定到 SecurityContext
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // 繼續執行過濾鏈
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            logger.error("JWT 認證失敗: " + e.getMessage(), e);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"error\": \"認證失敗\"}");
+        }
     }
 
     /**

@@ -60,6 +60,7 @@ public class MemberController {
 
         MemberDto dto = new MemberDto();
 
+        dto.setId(member.getId());
         dto.setAccount(account);
         dto.setName(member.getName());
         dto.setRole(member.getRole());
