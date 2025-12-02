@@ -17,7 +17,7 @@ public class SecurityConfig {
             // 設置授權規則
             .authorizeHttpRequests(auth -> auth
                 // 允許對所有活動和票種相關 API 的公共存取
-                .requestMatchers("/api/events/**", "/api/eventtickettype/**").permitAll()
+                .requestMatchers("/api/events/**", "/api/eventtickettype/**","/api/announcements/**","/api/log/session").permitAll()
                 // 允許 CORS 預檢請求
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() 
                 // 其他所有請求都需要身份驗證

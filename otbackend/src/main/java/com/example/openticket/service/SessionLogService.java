@@ -1,14 +1,15 @@
 package com.example.openticket.service;
 
-import com.example.openticket.entity.HomepageSessionLog;
-import com.example.openticket.repository.HomepageSessionLogRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.openticket.entity.HomepageSessionLog;
+import com.example.openticket.repository.HomepageSessionLogRepository;
 
 @Service
 public class SessionLogService {
@@ -52,34 +53,3 @@ public class SessionLogService {
     }
   
 }
-
-// @Service
-// public class SessionLogService {
-
-//     private final HomepageSessionLogRepository logRepository;
-
-//     @Autowired
-//     public SessionLogService(HomepageSessionLogRepository logRepository) {
-//         this.logRepository = logRepository;
-//     }
-
-//     @Transactional
-//     public HomepageSessionLog saveNewSessionLog(String sessionId) {
-        
-//         // 【暴力修正法】
-//         // 既然數據庫存入的時間比現在慢 8 小時 (存成 01:00 實際是 09:00)
-//         // 我們就手動在 Java 裡把這 8 小時加回去。
-//         // 原理：發送一個 "未來 8 小時" 的 UTC 時間，數據庫減去它的偏移量後，剛好等於現在的台灣時間。
-        
-//         Instant now = Instant.now();
-//         Instant adjustedTime = now.plus(8, ChronoUnit.HOURS);
-        
-//         HomepageSessionLog newLog = new HomepageSessionLog();
-//         newLog.setSessionId(sessionId);
-        
-//         // 寫入調整後的時間
-//         newLog.setFirstVisit(adjustedTime); 
-        
-//         return logRepository.save(newLog);
-//     }
-// }
