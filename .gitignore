@@ -25,3 +25,6 @@ Thumbs.db
 *.cache
 .parcel-cache/
 .turbo/
+
+# Application properties
+backend/src/main/resources/application.properties
