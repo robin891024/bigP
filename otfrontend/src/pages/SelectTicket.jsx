@@ -78,6 +78,24 @@ export default function SelectTicket() {
             t.ticket_template?.description ??
             "";
 
+          //處裡不限量(is_limited = 0)
+            const isLimited = t.isLimited ?? t.is_limited ?? t.islimited ?? 1; //1預設為限量
+            let stockLimit = Number(t.customlimit) || 0;
+
+            //如果不限量(isLimited === 0)且customlimit為null
+            if (isLimited === 0 || isLimited === 0){
+              stockLimit = 999;
+            }
+            //確保讀取到 'islimited' 欄位
+            const isLimitedStatus = t.isLimited ?? t.is_limited ?? t.islimited ?? 1; 
+
+            // 假設後端傳回 islimited: false 時是 '不限量'
+            if (isLimitedStatus === false) {
+                stockLimit = 999; // 設定極大值
+            } else {
+                // 如果是限量 (true) 且 customlimit=null，則 stockLimit 保持為 0
+                stockLimit = Number(t.customlimit) || 0; 
+            }
           // 支援多種 price 欄位命名
           const price = t.customprice ?? t.price ?? t.custom_price ?? 0;
 
@@ -94,6 +112,7 @@ export default function SelectTicket() {
             customprice: price,
             description: desc,
             selectedQty: 0,
+            customlimit: stockLimit,
           };
         });
 
@@ -110,10 +129,20 @@ export default function SelectTicket() {
 
   //處理票數變更
   function handleQtyChange(ticketId, qty) {
-    //確保選中的數量不超過當前可用庫存
-    const maxQty = tickets.find(t => t.id === ticketId)?.customlimit ?? 4; // 假設最大購買量是 4
-    const finalQty = Math.min(qty, maxQty);
-    setTickets((prev) => prev.map((t) => (t.id === ticketId ? { ...t, selectedQty: qty } : t)));
+    //取得票種可用庫存
+    const ticket = tickets.find(t => t.id === ticketId);
+    if (!ticket) return;
+
+    //設定最大購買量:取4張，或實際庫存兩者的最小值
+    const maxAvailableQty = Math.min(4, Number(ticket.customlimit || 4));
+
+    //確保選中數量不超過最大可用數量(目前設定最大4張)
+    // const maxQty = tickets.find(t => t.id === ticketId)?.customlimit ?? 4; // 假設最大購買量是 4
+    const finalQty = Math.min(qty, maxAvailableQty);
+    setTickets((prev) =>
+      prev.map((t) => (t.id === ticketId ? { ...t, selectedQty: finalQty } : t))
+    );
+    
   }
 
   //處理庫存回滾rollback
@@ -271,8 +300,7 @@ export default function SelectTicket() {
           ]}
         />
       </div>
-      <h1>🎫 線上購票系統</h1>
-
+      
       <div className="event-info">
         <div className="event-left">
           {/* 這是讀自己的圖片，非資料庫 */}
