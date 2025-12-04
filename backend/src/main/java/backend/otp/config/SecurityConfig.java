@@ -52,7 +52,8 @@ public class SecurityConfig {
                     "/member/register",
                     "/member/checkAc",
                     "/member/verify",
-                    "/oauth2/**"
+                    "/oauth2/**",
+                    "/loginLog/add"
                 ).permitAll()
                 // 其他端點需要認證
                 .anyRequest().authenticated()

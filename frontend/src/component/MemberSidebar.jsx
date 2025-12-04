@@ -1,14 +1,26 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 function MemberSidebar() {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState("info");
+    const location = useLocation();
     const [memberId, setMemberId] = useState("");
     const [account, setAccount] = useState("Loading...");
     const [name, setName] = useState("Loading...");
 
-    useEffect(() => {
+    // 根據當前路由決定 active 狀態
+    const getActiveTab = () => {
+        const path = location.pathname;
+        if (path.includes('/member/info')) return 'info';
+        if (path.includes('/member/wishList')) return 'favorites';
+        if (path.includes('/member/history')) return 'history';
+        return 'info';
+    };
+
+    const activeTab = getActiveTab();
+
+    // 載入會員資料
+    const fetchMemberData = () => {
         fetch("http://localhost:8080/member/profile", {
             credentials: 'include'
         })
@@ -19,15 +31,25 @@ function MemberSidebar() {
                 return res.json();
             })
             .then(data => {
-                setMemberId(data.id),
-                setAccount(data.account),
-                setName(data.name)
+                setMemberId(data.id);
+                setAccount(data.account);
+                setName(data.name);
             })
-            .catch(() => {
-                setMessage('無法載入會員資料');
+            .catch((error) => {
+                console.error('無法載入會員資料:', error);
             });
+    };
+
+    useEffect(() => {
+        fetchMemberData();
     }, []);
 
+    // 監聽路由變化，如果回到 member 頁面就重新載入資料
+    useEffect(() => {
+        if (location.pathname.includes('/member')) {
+            fetchMemberData();
+        }
+    }, [location.pathname]);
 
     const handleLogout = async () => {
         try {
@@ -59,12 +81,6 @@ function MemberSidebar() {
                 <div className="sidebar-header">
                     {/* 用戶頭像和資訊 */}
                     <div className="user-profile">
-                        {/* <div 
-                            className="user-avatar"
-                            style={{
-                                backgroundImage: `url("https://ui-avatars.com/api/?name=${encodeURIComponent(memberData?.name || 'User')}&background=197fe6&color=fff&size=128")`
-                            }}
-                        /> */}
                         <div className="user-info">
                             <h1 className="user-name">{name}</h1>
                             <p className="user-email">{account}</p>
@@ -78,8 +94,7 @@ function MemberSidebar() {
                             className={`nav-item ${activeTab === "info" ? "active" : ""}`}
                             onClick={(e) => {
                                 e.preventDefault();
-                                setActiveTab("info");
-                                navigate("/member/info")
+                                navigate("/member/info");
                             }}
                         >
                             <span className="material-symbols-outlined">person</span>
@@ -90,7 +105,6 @@ function MemberSidebar() {
                             className={`nav-item ${activeTab === "favorites" ? "active" : ""}`}
                             onClick={(e) => {
                                 e.preventDefault();
-                                setActiveTab("favorites");
                                 navigate("/member/wishList", { state: { id: memberId } });
                             }}
                         >
@@ -102,7 +116,7 @@ function MemberSidebar() {
                             className={`nav-item ${activeTab === "history" ? "active" : ""}`}
                             onClick={(e) => {
                                 e.preventDefault();
-                                setActiveTab("history");
+                                navigate("/member/history");
                             }}
                         >
                             <span className="material-symbols-outlined unfilled">receipt_long</span>

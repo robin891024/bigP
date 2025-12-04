@@ -19,4 +19,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>{
     @Query("SELECT m.password FROM Member m WHERE m.account = :account")
     String findPasswordByAccount (String account);
     
+    @Query("SELECT m.id FROM Member m WHERE m.account = :account")
+    Long findIdByAccount (String account);
 }

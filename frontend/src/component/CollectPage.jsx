@@ -12,28 +12,64 @@ function CollectPage() {
 
     useEffect(() => {
         if (!memberId) return;
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const res = await fetch(`http://localhost:8080/wishList/get?userId=${memberId}`, {
-                    credentials: "include"
-                });
-                
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                
-                const data = await res.json();
-                setList(data);
-            } catch (err) {
-                console.error("error:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
+        fetchWishList();
     }, [memberId]);
+
+    const fetchWishList = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch(`http://localhost:8080/wishList/get?userId=${memberId}`, {
+                credentials: "include"
+            });
+            
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            
+            const data = await res.json();
+            setList(data);
+        } catch (err) {
+            console.error("error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (eventId) => {
+        if (!window.confirm('確定要刪除這個收藏嗎？')) {
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:8080/wishList/delete', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    memberId: memberId,
+                    eventId: eventId
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                // 刪除成功，重新載入列表
+                await fetchWishList();
+                // 如果當前頁沒有資料了，回到上一頁
+                if (currentItems.length === 1 && currentPage > 1) {
+                    setCurrentPage(currentPage - 1);
+                }
+            } else {
+                alert(data.message || '刪除失敗');
+            }
+        } catch (err) {
+            console.error('刪除錯誤:', err);
+            alert('刪除失敗，請稍後再試');
+        }
+    };
 
     const getStatusClass = (status) => {
         const statusMap = {
@@ -103,6 +139,7 @@ function CollectPage() {
                                             <th className="table-column-phone">電話</th>
                                             <th className="table-column-status">活動狀態</th>
                                             <th>活動連結</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -119,6 +156,15 @@ function CollectPage() {
                                                 </td>
                                                 <td>
                                                     <a className="event-link" href={`/event/${w.eventId}`}>查看活動</a>
+                                                </td>
+                                                <td>
+                                                    <button 
+                                                        className="delete-button"
+                                                        onClick={() => handleDelete(w.eventId)}
+                                                        title="刪除收藏"
+                                                    >
+                                                        <span className="material-symbols-outlined">delete</span>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}

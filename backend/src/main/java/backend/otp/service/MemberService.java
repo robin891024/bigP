@@ -55,6 +55,8 @@ public class MemberService {
         return repository.findRoleByAccount(account);
     }
 
-    
+    public Long findIdByAccount (String account) {
+        return repository.findIdByAccount(account);
+    }
 
 }

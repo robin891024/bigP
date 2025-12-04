@@ -42,6 +42,7 @@ public class WishListService {
         }
     }
 
+    @Transactional
     public boolean deleteWishList(Long memberId, Long eventId) {
         if (repository.existsByMember_IdAndEvent_Id(memberId, eventId)) {
             repository.deleteByMember_IdAndEvent_Id(memberId, eventId);

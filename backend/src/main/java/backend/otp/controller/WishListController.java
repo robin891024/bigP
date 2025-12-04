@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +30,7 @@ public class WishListController {
     private WishListService service;
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Map<String, Object>> addWishList(@RequestBody WishListDto wishList, HttpServletRequest request) {
 
         Map<String, Object> res = new HashMap<>();
@@ -55,6 +58,7 @@ public class WishListController {
     }
 
     @GetMapping("/get")
+    @PreAuthorize("hasRole('USER')")
     public List<ShowWishListDto> getWishList(@RequestParam Long userId) {
 
         List<WishList> wishList = service.getWishListByUserId(userId);
@@ -88,6 +92,18 @@ public class WishListController {
             default ->
                 "未知狀態";
         };
+    }
+
+    @DeleteMapping("/delete")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Map<String, Object>> deleteWishList(@RequestBody WishListDto wishList, HttpServletRequest request) {
+        Map<String, Object> res = new HashMap<>();
+
+        boolean success = service.deleteWishList(wishList.getMemberId(), wishList.getEventId());
+
+        res.put("success", success);
+        res.put("message", success ? "成功刪除" : "刪除失敗");
+        return ResponseEntity.ok(res);
     }
 
 }

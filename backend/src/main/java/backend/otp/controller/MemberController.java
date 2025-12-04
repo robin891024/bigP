@@ -1,5 +1,6 @@
 package backend.otp.controller;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import backend.otp.dto.MemberDto;
 import backend.otp.dto.MemberReviseDto;
+import backend.otp.entity.LoginLog;
 import backend.otp.entity.Member;
+import backend.otp.service.LoginLogService;
 import backend.otp.service.MemberService;
 import backend.otp.utils.BCrypt;
 import backend.otp.utils.JWTutils;
@@ -38,6 +41,9 @@ public class MemberController {
 
     @Autowired
     private MemberService service;
+
+    @Autowired
+    private LoginLogService LoginLogservice;
 
     @Autowired
     private JWTutils jwt;
@@ -92,13 +98,16 @@ public class MemberController {
     public ResponseEntity<Map<String, Object>> login(
             @RequestParam String account,
             @RequestParam String password,
-            HttpServletResponse response) {
+            HttpServletResponse response,
+            HttpServletRequest request) {
 
         Map<String, Object> body = new HashMap<>();
 
         boolean success = service.login(account, password);
 
         if (success) {
+
+            addLoginLog(account, LoginLog.Status.SUCCESS, request);
 
             Integer role = service.findRoleByAccount(account);
 
@@ -118,6 +127,9 @@ public class MemberController {
             body.put("message", "登入成功");
             return ResponseEntity.ok(body);
         } else {
+
+            addLoginLog(account, LoginLog.Status.FAIL, request);
+
             body.put("success", false);
             body.put("message", "帳號或密碼錯誤");
             return ResponseEntity.ok(body);
@@ -174,7 +186,7 @@ public class MemberController {
         if (jwtToken != null && jwt.validateToken(jwtToken)) {
             String account = jwt.getUsernameFromToken(jwtToken);
 
-            map.put("success", BCrypt.checkpw(req.get("password"), service.findPassword(account))); 
+            map.put("success", BCrypt.checkpw(req.get("password"), service.findPassword(account)));
             return ResponseEntity.ok(map);
         } else {
             map.put("success", false);
@@ -233,4 +245,29 @@ public class MemberController {
 
         return null;
     }
+
+    private boolean addLoginLog(String account, LoginLog.Status status, HttpServletRequest request) {
+
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null) {
+            ip = request.getRemoteAddr();
+        }
+
+        String userAgent = request.getHeader("User-Agent");
+
+        LoginLog log = new LoginLog();
+
+        Long id = service.findIdByAccount(account);
+
+        log.setUserId(id);
+        log.setUserAgent(userAgent);
+        log.setIpAddress(ip);
+        log.setStatus(status);
+        log.setLoginTime(LocalDateTime.now());
+
+        LoginLogservice.saveLoginLog(log);
+
+        return true;
+    }
+
 }
