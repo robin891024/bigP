@@ -187,11 +187,11 @@ export const useAuth = () => {
             // 登出成功或發生其他錯誤，導航到登入頁面
             if (res.ok) {
                 // 如果後端成功，導航到首頁或登入頁
-                navigate("/login"); 
+                navigate("/"); 
             } else {
                 // 處理非 2xx 響應
                 console.error('Logout API failed with status:', res.status);
-                navigate("/login"); 
+                navigate("/"); 
             }
 
         } catch (error) {
