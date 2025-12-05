@@ -27,12 +27,12 @@ function Header({ showSearchBar = false }) {
     }
   };
   // 2. 新增 useEffect 監聽 isLoggedIn 狀態
-  useEffect(() => {
-    // 檢查狀態是否從登入轉變為登出 (且頁面不在首頁時才導航，避免無限迴圈)
-    if (!isLoggedIn && !isLoading && window.location.pathname !== '/') {
-      navigate("/");
-    }
-  }, [isLoggedIn, isLoading, navigate]); // 依賴 isLoggedIn, isLoading, navigate
+  // useEffect(() => {
+  //   // 檢查狀態是否從登入轉變為登出 (且頁面不在首頁時才導航，避免無限迴圈)
+  //   if (!isLoggedIn && !isLoading && window.location.pathname !== '/') {
+  //     navigate("/");
+  //   }
+  // }, [isLoggedIn, isLoading, navigate]); // 依賴 isLoggedIn, isLoading, navigate
   // 如果正在載入中，可以選擇返回一個載入中的 Header，或返回 null
   if (isLoading) {
     // 載入時可以顯示一個簡化的 Header，避免內容閃爍
