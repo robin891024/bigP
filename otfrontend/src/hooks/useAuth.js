@@ -169,7 +169,7 @@ export const useAuth = () => {
     // 2. 登出函式：清除後端 Cookie 和本地狀態
     const logout = useCallback(async () => {
         try {
-            const res = await fetch("http://localhost:8080/member/logout", {
+            const res = await fetch("/api/member/logout", {
                 method: "POST",
                 credentials: "include"
             });

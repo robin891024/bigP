@@ -7,7 +7,7 @@ const SESSION_KEY = 'homepage_session';
 // Session 有效期限：3 分鐘 = 180,000 毫秒
 const SESSION_DURATION_MS = 3 * 60 * 1000;
 // 後端 API 端點 (請根據您的 Spring Boot 服務地址配置)
-const TRACKING_API_URL = '/api/log/session'; 
+const TRACKING_API_URL = 'http://localhost:8080/api/log/session'; 
 // -----------------
 
 /**
