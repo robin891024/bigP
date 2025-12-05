@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom"; 
-import FormPage from '../pages/FormPage';
-// import { Card, CardContent } from "@/components/ui/card";
-// import { Button } from "@/components/ui/button";
-// import { Link as LinkIcon, Search } from "lucide-react"; 
+
 
 
 function Footer() {
@@ -13,7 +10,7 @@ function Footer() {
     <div className="space-x-4">
 
       {/* 內部路由連結 */}
-      <RouterLink to="/FormPage" className="hover:underline transition duration-150">聯絡我們</RouterLink>
+      <a href="mailto:contact@openticket.com" className="hover:underline">聯絡信箱</a>
       <RouterLink to="/FAQList" className="hover:underline transition duration-150">常見問題</RouterLink>
       <RouterLink to="/Privacy" className="hover:underline transition duration-150">Privacy</RouterLink>
     </div>
