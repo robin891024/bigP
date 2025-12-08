@@ -38,7 +38,7 @@ public class Reservations {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "totalAmount")
+    @Column(name = "total_amount")
     private BigDecimal totalAmount;//所有票種的價格
 
     // --- 關聯 ReservationItems (預訂單明細) ---

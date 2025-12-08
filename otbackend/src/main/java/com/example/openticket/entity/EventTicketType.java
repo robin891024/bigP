@@ -29,6 +29,11 @@ public class EventTicketType {
     @JoinColumn(name = "ticket_template_id", nullable = false)
     private TicketType ticketType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "early_bird_config_id", nullable = false)
+    private TicketDiscountConfig ticketDiscountConfig;
+
+
     @Column(name = "is_limited")
     private Boolean islimited;
 
@@ -43,9 +48,6 @@ public class EventTicketType {
 
     @Column(name = "is_early_bird")
     private Boolean earlybirdticket;
-
-    @Column(name = "early_bird_config_id")
-    private Long earlybirdconfigId;
 
     public Long getId() {
         return id;
@@ -111,11 +113,11 @@ public class EventTicketType {
         this.earlybirdticket = earlybirdticket;
     }
 
-    public Long getEarlybirdconfigId() {
-        return earlybirdconfigId;
+    public TicketDiscountConfig getTicketDiscountConfig() {
+        return ticketDiscountConfig;
     }
 
-    public void setEarlybirdconfigId(Long earlybirdconfigId) {
-        this.earlybirdconfigId = earlybirdconfigId;
+    public void setTicketDiscountConfig(TicketDiscountConfig ticketDiscountConfig) {
+        this.ticketDiscountConfig = ticketDiscountConfig;
     }
 }

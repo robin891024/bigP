@@ -207,7 +207,7 @@ export default function SelectTicket() {
 
     try {
       console.log("開始結帳流程...");
-      setMessage("已暫時保留票券，請於 2 分鐘內完成付款。");
+      setMessage("請於 2 分鐘內完成付款。");//原本有鎖票前面會加這段文字"已暫時保留票券，"
 
       //3.針對每一個選定的票種，使用後端API鎖庫存
       // const decreasePromises = checkoutItems.map(async (item) => {

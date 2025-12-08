@@ -18,8 +18,6 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
-    // private String detail;
-    // private String date;
     private String address;
     
     private LocalDate event_start;//型別設定為LocalDate 不含時間、不含時區 → 不會因為部署地變動而產生日期跑掉的情況。
