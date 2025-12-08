@@ -52,8 +52,7 @@ export default function SelectTicket() {
     if (!eventId) return;
 
     fetch(`${BASE_API_URL}/api/eventtickettype/event_ticket_type/${eventId}`, {
-      credentials: 'include'
-    })
+      credentials: 'include'})
       .then((r) => {
         if (!r.ok) throw new Error(`無法取得票種資料，錯誤碼: ${r.status}`);
         return r.json();
@@ -261,6 +260,7 @@ export default function SelectTicket() {
       const res = await fetch(`${BASE_API_URL}/api/reservations/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", 
         body: JSON.stringify(createBody),
       });
 
