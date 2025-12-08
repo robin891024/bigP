@@ -29,17 +29,6 @@ public class TicketType {
     public int getPrice() { return price; }
     public void setPrice(int price) { this.price = price; }
 
-    // public String getRemark() { return remark; }
-    // public void setRemark(String remark) { this.remark = remark; }
-
-    // public boolean isStatus() {
-    //     return status;
-    // }
-
-    // public void setStatus(boolean status) {
-    //     this.status = status;
-    // }
-
     public String getDescription() {
         return description;
     }
