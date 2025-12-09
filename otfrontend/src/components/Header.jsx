@@ -6,13 +6,16 @@ import { useAuth } from '../hooks/useAuth';
 
 function Header({ showSearchBar = false }) {
   // *********** 模擬登入狀態：使用 會員名稱 ***********
-  const { isLoggedIn, userName, logout , isLoading} = useAuth();
+  const { isLoggedIn, userName, logout , isLoading, userRole} = useAuth(); // <-- 從 useAuth 獲取 userRole
   // console.log('Header State:', { isLoggedIn, userName, isLoading });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isComposing, setIsComposing] = useState(false);
   const navigate = useNavigate();
 
+  const isAdmin = isLoggedIn && (userRole === 0 || userRole === 1);
+  const ADMIN_DASHBOARD_URL = "http://localhost:8081/admin/dashboard";
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -106,11 +109,23 @@ function Header({ showSearchBar = false }) {
           )}
           
           {/* 【修改點】桌面端顯示用戶名，只有登入時顯示 */}
-          {isLoggedIn && userName ? (
-            <Link to="/member/info" className="hover:underline transition duration-150 font-semibold">{userName}</Link> 
-          ) : (
-            // 如果未登入，這裡不顯示任何東西
-            <></>
+          {/* 【桌面端修改：用戶名和後台連結】 */}
+          {isLoggedIn && userName && (
+            <div className="flex items-center space-x-4">
+            {/* 後台管理連結 (在用戶名左邊，僅管理員顯示) */}
+            {isAdmin && (
+              <a 
+              href={ADMIN_DASHBOARD_URL}
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:underline transition duration-150 font-semibold text-primary/80"
+              >
+              後台管理系統
+              </a>
+            )}
+            {/* 用戶名連結 */}
+            <Link to="/member/info" className="hover:underline transition duration-150 font-semibold">{userName}</Link>
+            </div>
           )}
 
           <Button variant="secondary" className="ml-2" onClick={handleAuthClick}>
@@ -162,17 +177,30 @@ function Header({ showSearchBar = false }) {
             
             {/* **** 修正區塊 2: 獨立的會員名稱區域 (只在登入後顯示) **** */}
             {isLoggedIn && userName && ( // 確保登入且有用戶名才顯示
-            <Link
-              to="/member/info" 
-              className="block px-6 pt-4 text-xl font-semibold text-gray-700 hover:text-primary transition"
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/member/info"); 
-              }}
-            >
-              {userName} {/* 加上歡迎詞更友善 */}
-            </Link>
-            )}
+              <div className="px-6 pt-4 pb-2 border-b border-gray-100">
+                {/* 用戶名 */}
+                <Link
+                to="/member/info" 
+                className="block text-xl font-semibold text-gray-700 hover:text-primary transition"
+                onClick={() => setIsMenuOpen(false)}
+                >
+                {userName}
+                </Link>
+                
+                {/* 後台管理連結 (在用戶名下方，僅管理員顯示) */}
+                {isAdmin && (
+                <a 
+                  href={ADMIN_DASHBOARD_URL} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block text-base font-semibold text-primary hover:text-primary/80 transition mt-2" // 調整字體大小和間距
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  後台管理系統
+                </a>
+                )}
+              </div>
+              )}
             {/* ******************************************************** */}
 
             {/* 選單主體：連結列表 */}

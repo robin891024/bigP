@@ -31,7 +31,10 @@ public class AnnouncementRepository {
             rs.getString("title"),
             rs.getString("content"),
             rs.getTimestamp("created_at").toLocalDateTime(),
-            rs.getLong("user_id")
+            rs.getLong("user_id"),
+            // 【新增】從 ResultSet 中獲取 JOIN 查詢結果中的 'publisher_role'
+            rs.getInt("role")
+            
         );
     }
 
@@ -42,7 +45,10 @@ public class AnnouncementRepository {
      */
     public List<Announcement> findLatest(Integer limit) {
         // 基礎 SQL 語句
-        String baseSql = "SELECT id, title, content, created_at, user_id FROM announcement ORDER BY created_at DESC";
+        String baseSql = "SELECT a.id, a.title, a.content, a.created_at, a.user_id, u.role AS role " // <-- 【關鍵新增】u.role
+                     + "FROM announcement a "
+                     + "JOIN user u ON a.user_id = u.id " // <-- 【關鍵新增】JOIN 查詢
+                     + "ORDER BY a.created_at DESC";
 
         // 參數列表
         List<Object> params = new ArrayList<>();

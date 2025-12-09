@@ -25,8 +25,7 @@ function AnnouncementList({ limit = null, isFullPage = false, onSelectAnnounceme
                     url += `?limit=${limit}`; 
                 }
                 // console.log("Fetching announcements from URL:", url);
-                const response = await fetch(url); 
-                
+                const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`HTTP 錯誤! 狀態碼: ${response.status}`);
                 }
@@ -35,14 +34,21 @@ function AnnouncementList({ limit = null, isFullPage = false, onSelectAnnounceme
                 
                 const formattedData = data.map(ann => ({
                     ...ann,
-                    // 格式化日期為 YYYY/MM/DD
+                    // 格式化日期
                     dateOnly: new Date(ann.created_at || ann.date).toLocaleDateString('zh-TW', {
                         year: 'numeric',
                         month: '2-digit',
                         day: '2-digit',
-                    }).replace(/\//g, '/'), // 確保使用斜線分隔
-                    // 根據標題判斷標籤
-                    tag: (ann.user_id === 1 || ann.user_id === 3) ? '系統公告' : '活動公告',
+                    }).replace(/\//g, '/'), 
+                    
+                    // ***** 核心修改：根據 role 判斷標籤 *****
+                    // 假設後端返回的公告物件中包含 ann.publisher_role 欄位
+                    tag: (ann.role === 0) 
+                        ? '系統公告' // 角色 0 為系統/開發者 (根據 user 表格 role 欄位)
+                        : (ann.role === 1) 
+                            ? '活動公告' // 角色 1 為主辦方
+                            : '一般公告', // 其他角色或未知
+                    // **********************************
                 }));
 
                 setAnnouncements(formattedData);

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/ToastContext';
 
+
 // --- 配置常數 ---
 const BASE_URL = 'http://localhost:8080';
 // -----------------
@@ -101,10 +102,13 @@ const actualApi = {
                 const data = await res.json();
                 // 這裡直接使用 data.name，因為 MemberInfo 顯示的後端數據結構就是這樣。
                 const userName = data.name || '會員'; 
+                // 從 API 回應中獲取 role，並確保它是數字 (如果後端是字串則需要 parseInt)
+                const userRole = data.role !== undefined ? parseInt(data.role, 10) : null;
 
                 return { 
                     success: true, 
                     name: userName,
+                    role: userRole, // <-- 【新增】返回用戶角色
                     message: 'Token 驗證成功' 
                 };
                 
@@ -145,34 +149,54 @@ export const useAuth = () => {
     // 狀態管理
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userName, setUserName] = useState("");
+    const [userRole, setUserRole] = useState(null);
+    
     const navigate = useNavigate();
     // 由於 JWT 是存在 HttpOnly Cookie 中 (前端無法讀取)，
     // 我們無法直接依賴 authToken 狀態。
     // 我們改為依賴 isLoggedIn 狀態，並在載入時調用 getProfile 來驗證 Cookie。
     const [isLoading, setIsLoading] = useState(true);
     const { showToast } = useToast();
+   
+    // 輔助函式：用來從 /member/profile 獲取並設置狀態 (登入成功後調用)
+    const setAuthStatusFromProfile = useCallback(async () => {
+        const result = await actualApi.getProfile();
+        
+        if (result.success) {
+            setUserName(result.name);
+            setUserRole(result.role); // <-- 【新增】設置用戶角色
+            setIsLoggedIn(true);
+            return true;
+        } else {
+            setUserName("");
+            setUserRole(null); // <-- 清除角色
+            setIsLoggedIn(false);
+            return false;
+        }
+    }, []);
+
     // 1. 登入函式：呼叫 API 並讓後端設置 Cookie
     const login = useCallback(async (account, password) => {
         const result = await actualApi.login(account, password);
         
         if (result.success) {
-            // 登入成功後，JWT Cookie 已由後端設置。
-            // 由於我們無法直接讀取 Cookie，所以需要立即更新本地狀態。
-            setUserName(result.name);
-            setIsLoggedIn(true);
+            // 登入成功後，立即調用 setAuthStatusFromProfile 獲取 role 並更新狀態
+            await setAuthStatusFromProfile();
             return { success: true };
 
         } else {
             console.error('Login failed:', result.message);
             return { success: false, error: result.message };
         }
-    }, []);
+    }, [setAuthStatusFromProfile]);
 
     // 2. 登出函式：清除後端 Cookie 和本地狀態
     const logout = useCallback(async () => {
         // 【第 1 步】：先確保本地狀態被清除 (預先將前端視為登出狀態)
         setUserName("");
+        setUserRole(null);
         setIsLoggedIn(false);
+        setUserRole(null);
 
         let success = false;
         
@@ -220,19 +244,21 @@ export const useAuth = () => {
         const checkLoginStatus = async () => {
             // 嘗試呼叫一個受保護的 API (例如 /member/info)
             // 瀏覽器會自動帶上 JWT Cookie
+            
             setIsLoading(true);
-            const result = await actualApi.getProfile();
+            await setAuthStatusFromProfile();
+            // const result = await actualApi.getProfile();
 
-            if (result.success) {
-                // Cookie 有效，且成功返回用戶名
-                setUserName(result.name);
-                setIsLoggedIn(true);
-            } else {
-                // Cookie 無效、過期或不存在
-                // 注意：這裡不需要呼叫 logout，因為 Cookie 已經失效，只需確保本地狀態為登出
-                setUserName("");
-                setIsLoggedIn(false);
-            }
+            // if (result.success) {
+            //     // Cookie 有效，且成功返回用戶名
+            //     setUserName(result.name);
+            //     setIsLoggedIn(true);
+            // } else {
+            //     // Cookie 無效、過期或不存在
+            //     // 注意：這裡不需要呼叫 logout，因為 Cookie 已經失效，只需確保本地狀態為登出
+            //     setUserName("");
+            //     setIsLoggedIn(false);
+            // }
             setIsLoading(false);
         };
         
@@ -242,5 +268,5 @@ export const useAuth = () => {
     }, []); 
 
 
-    return { isLoggedIn, userName, login, logout, isLoading };
+    return { isLoggedIn, userName, userRole, login, logout, isLoading };
 };
