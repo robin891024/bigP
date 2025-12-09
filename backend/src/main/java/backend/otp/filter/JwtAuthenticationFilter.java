@@ -36,6 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/member/register")
                 || path.equals("/member/checkAc")
                 || path.equals("/member/verify")
+                || path.equals("/member/send-verification-code")
+                || path.equals("/member/verify-email-code")
                 || path.startsWith("/oauth2/")) {
             filterChain.doFilter(request, response);
             return;

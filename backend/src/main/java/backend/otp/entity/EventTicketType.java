@@ -11,20 +11,14 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name="event")
+@Table(name="event_ticket_type")
 @Data
-public class Event {
+public class EventTicketType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
-    private Long status_id;
-
-
-    //---------------------------------------
-
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = false)
-    private Member organizer;  // 改為 Member，因為 company 和 user 已合併
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ticket_template_id")
+    private TicketType ticketTemplate;
 }

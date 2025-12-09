@@ -23,7 +23,17 @@ function GoogleLoginButton() {
             const data = await response.json();
 
             if (data.success) {
-                navigate('/member');
+                await new Promise(r => setTimeout(r, 0)); // 把 navigate 延後到下一個事件循環
+
+                if (data.role == "user") {
+                    navigate('/member');
+                } else if (data.role == "admin") {
+                    navigate('/organizer/dashboard');
+                } else if (data.role == "developer") {
+                    navigate('/admin/dashboard');
+                } else {
+                    console.log("error");
+                }
             } else if (data.needRegister) {
                 navigate("/googleRegister", {
                     state: {

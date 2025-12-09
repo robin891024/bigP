@@ -155,7 +155,7 @@ function CollectPage() {
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <a className="event-link" href={`/event/${w.eventId}`}>查看活動</a>
+                                                    <a className="event-link" href={`/event/detail/${w.eventId}`}>查看活動</a>
                                                 </td>
                                                 <td>
                                                     <button 

@@ -36,6 +36,20 @@ function Login() {
         e.preventDefault()
 
         try {
+            const response = await fetch(`http://localhost:8080/member/checkAc?account=${account}`);
+            if (!response.ok) throw new Error("伺服器回應錯誤");
+
+            const isExist = await response.json();
+            if (!isExist) {
+                setMessage("帳號或密碼錯誤")
+                return
+            }
+        } catch (err) {
+            setMessage("連線失敗，請稍後再試")
+            return
+        }
+
+        try {
             const res = await fetch("http://localhost:8080/member/login", {
                 method: "POST",
                 headers: {
@@ -49,11 +63,19 @@ function Login() {
             })
 
             const data = await res.json()
-            
+
             if (data.success) {
                 setMessage("登入成功！")
                 setTimeout(() => {
-                    navigate("/member");
+                    if (data.role == "user") {
+                        navigate('/member');
+                    } else if (data.role == "admin") {
+                        navigate('/organizer/dashboard')
+                    } else if (data.role == "developer") {
+                        navigate('/admin/dashboard')
+                    } else {
+                        console.log("error");
+                    }
                 }, 500);
             } else {
                 setMessage(data.message || "帳號或密碼錯誤")
@@ -93,7 +115,7 @@ function Login() {
                     {isDark ? "light_mode" : "dark_mode"}
                 </span>
             </button>
-            
+
             <div className="login-container">
                 {/* 左側輪播區 */}
                 <div className="carousel-section">
@@ -102,7 +124,7 @@ function Login() {
                             {carouselItems.map((item, index) => (
                                 <div key={index} className="carousel-item">
                                     <div className="carousel-card">
-                                        <div 
+                                        <div
                                             className="carousel-image"
                                             style={{ backgroundImage: `url(${item.image})` }}
                                         />
