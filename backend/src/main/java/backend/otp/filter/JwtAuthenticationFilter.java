@@ -37,6 +37,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.equals("/member/checkAc")
                 || path.equals("/member/verify")
                 || path.startsWith("/oauth2/")
+                || path.equals("/member/send-verification-code")
+                || path.equals("/member/verify-email-code")
                 || path.startsWith("/api/announcements") // 允許 /api/announcements 和 /api/announcements/**
                 || path.startsWith("/api/events") // 允許 /api/events 和 /api/events/**
                 || path.startsWith("/api/log/session")) {

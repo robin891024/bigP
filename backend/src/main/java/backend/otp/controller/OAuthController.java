@@ -80,6 +80,8 @@ public class OAuthController {
                     return ResponseEntity.ok(result);
                 }
 
+                
+
                 // 產生 JWT token
                 Integer role = memberService.findRoleByAccount(email);
 
@@ -97,6 +99,17 @@ public class OAuthController {
 
                 result.put("success", true);
                 result.put("message", "Google 登入成功");
+                String rolelevel = switch (role) {
+                    case 0 ->
+                        "developer";
+                    case 1 ->
+                        "admin";
+                    case 2 ->
+                        "user";
+                    default ->
+                        "error";
+                };
+                result.put("role", rolelevel);
                 result.put("user", Map.of("email", email, "name", name));
             } else {
                 result.put("success", false);
