@@ -7,7 +7,7 @@ import '../Css/SelectTicket.css';
 // **** 設定Spring Boot基礎URL ****
 const BASE_API_URL = 'http://localhost:8080';
 //圖片先寫死
-// const DEFAULT_IMAGE_URL = "/images/test.jpg";
+const DEFAULT_IMAGE_URL = "/images/test.jpg";
 
 export default function SelectTicket() {
   const params = new URLSearchParams(window.location.search);
@@ -27,11 +27,27 @@ export default function SelectTicket() {
     0
   );
   const totalTickets = tickets.reduce((acc, t) => acc + (t.selectedQty || 0), 0);
-  const selectedTicketText = tickets
+  const selectedTicketsArray = tickets
     .filter((t) => t.selectedQty > 0)
     .map((t) => `${t.ticketType} ${t.selectedQty}張`)
-    .join("/");
 
+    const MAX_TICKETS_PER_LINE = 2;
+
+    let selectedTicketText = "";
+    for (let i = 0; i < selectedTicketsArray.length; i++) {
+    selectedTicketText += selectedTicketsArray[i];
+
+    if (i < selectedTicketsArray.length - 1) {
+      // 如果不是最後一個項目
+      if ((i + 1) % MAX_TICKETS_PER_LINE === 0) {
+        // 每隔 N 個項目後換行
+        selectedTicketText += " / \n"; // 插入斜線和換行符
+      } else {
+        // 其他項目間使用斜線分隔
+        selectedTicketText += " / ";
+      }
+    }
+  }
   //載入活動資料
   useEffect(() => {
     if (!eventId) return;
@@ -354,11 +370,12 @@ export default function SelectTicket() {
         />
       </div>
       
+      <div className="event-info-wrapper">
       <div className="event-info">
-        {/* <div className="event-left"> */}
+        <div className="event-left">
           {/* 這是讀自己的圖片，非資料庫 */}
-          {/* <img className="event-image" alt="event" src={`${BASE_API_URL}${DEFAULT_IMAGE_URL}`} /> */}
-        {/* </div> */}
+          <img className="event-image" alt="event" src={`${BASE_API_URL}${DEFAULT_IMAGE_URL}`} />
+        </div>
 
         <div className="event-center">
           <h5 id="eventTitle" className="event-title">
@@ -368,7 +385,7 @@ export default function SelectTicket() {
           <p id="eventLocation">{event ? `活動地點: ${event.address}` : ""}</p>
         </div>
       </div>
-
+      </div>
       <div className="main-content-wrapper">
         <div className="ticketzone">
           <h2>票種選擇</h2>
@@ -433,10 +450,11 @@ export default function SelectTicket() {
         </div>
 
         <aside className="totalfee-fixed">
-          <div>
-            票種: <span id="tickettype">{selectedTicketText}</span>
+          <div className="ticket-type-summary">
+          <span className="ticket-type-label">票種:</span>
+          <span id="tickettype">{selectedTicketText}</span>
           </div>
-          <div>總共張數: <span id="totaltickets">{`總共${totalTickets}張`}</span></div>
+          <div><strong>總張數:</strong> <span id="totaltickets">{`總共 ${totalTickets}張`}</span></div>
           <hr />
           <div>
             <strong>總金額: <span id="total">NT${totalAmount}</span></strong>

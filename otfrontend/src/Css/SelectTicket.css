@@ -11,16 +11,6 @@ body {
 }
 * { box-sizing: border-box; }
 
-/* 頁首與頁尾 */
-/* footer {
-    background-color: #e9ecef;
-    text-align: center;
-    padding: 20px;
-    color: #333;
-    font-weight: 600;
-    width: 100%;
-    margin-top: 30px; 
-} */
 
 /* 容器 */
 .ticketpage {
@@ -50,14 +40,14 @@ h1 {
     width: 100%; 
     display: flex;
     align-items: center;
-    padding: 10px 5%; 
+    padding: 10px 0; 
     margin-bottom: 20px;
     min-height: 150px; /* 固定最小高度 */
 }
 .event-left { 
     flex: 0 0 150px; 
     display: flex; 
-    justify-content: center;
+    justify-content: flex-start;
 }
 .event-image {
     width: 100%;
@@ -68,7 +58,7 @@ h1 {
 
 .event-center { 
     flex: 1; 
-    text-align: left; 
+    text-align: left;
     padding-left: 20px;
     min-height: 100px; /* 固定最小高度 */
 }
@@ -83,6 +73,16 @@ h1 {
     font-size: 1rem;
     color: #555;
 }
+.event-info-wrapper {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto 0 auto;
+    padding: 0;
+}
+
+
+
+
 
 
 /* ====== 購票區外框 (ticketzone) ====== */
@@ -120,7 +120,7 @@ h1 {
 }
 .tickets th, .tickets td {
     border: 1px solid #ddd;
-    padding: 12px 10px;
+    padding: 12px 15px;
     text-align: center;
 }
 /* 移除最外側表格邊框的重複線條 */
@@ -151,7 +151,7 @@ h1 {
 
 /* *** 下拉選單樣式 (已修改為白色背景，並確保文字為黑色) *** */
 .tickets select {
-    width: 100px;
+    width: 130px;
     padding: 6px;
     border-radius: 5px;
     border: 1px solid #ccc;
@@ -162,6 +162,38 @@ h1 {
 
 
 /* ====== 總計區 (totalfee) - 靠右對齊 ====== */
+
+/* 針對「票種」的 div，設定為區塊顯示，允許內容換行 */
+.ticket-type-summary {
+    display: flex; /* 讓內容可以自由換行 */
+    align-items: flex-start;
+    padding-bottom: 5px; /* 底部增加間距 */
+    line-height: 1.5;
+    font-weight: bold; /* 讓標籤更突出 */
+}
+
+.ticket-type-label {
+    flex-shrink: 0; /* 不壓縮 */
+    padding-right: 5px; /* 增加標籤和內容之間的間隔 */
+    font-weight: bold;
+}
+
+/* 針對「總共張數」的 div，維持 Flex 佈局 */
+.totalfee-fixed > div:not(.ticket-type-summary):not(:last-child) { 
+    /* text-align: left; */
+    display: flex; 
+    /* justify-content: space-between; 
+    line-height: 1.8; */
+    /* flex-wrap: nowrap; 確保總張數不換行  */
+} 
+
+#tickettype {
+    white-space: pre-wrap; /* 讓內容自動換行 (預設值，但明確寫出確保覆蓋) */
+    display: block; /* 確保它能與前面的「票種:」在同一行開始 */
+    font-weight: normal; /* 讓清單文字與標籤區分 */
+    color: #444;
+    word-break: break-word;
+}
 .totalfee-fixed {
     /* 關鍵：靠右對齊 */
     margin-left: auto; 
@@ -183,21 +215,20 @@ h1 {
     margin-top: 20px; 
 }
 
-/* 讓總計金額和票種等資訊在區塊內呈現左標籤右數值的形式 */
-.totalfee-fixed > div:not(:last-child) {
-    text-align: left;
-    display: flex; 
-    justify-content: space-between; 
-    line-height: 1.8;
-}
-
-.totalfee-fixed strong {
+.totalfee-fixed strong span#total {
     font-size: 1.2rem;
     color: #000;
+    font-weight: 600;
 }
 
 .totalfee-fixed hr {
     margin: 10px 0;
+}
+
+#totaltickets {
+    /* 讓這個 span 內的文字保持正常粗細 */
+    font-weight: normal; 
+    color: #444;
 }
 
 
@@ -234,16 +265,18 @@ h1 {
     .event-info {
         padding: 10px 20px;
         flex-direction: column;
-        align-items: center;
-        text-align: center;
+        align-items: flex-start;
+        text-align: left;
         min-height: auto; 
     }
     .event-left {
-        margin-bottom: 10px; 
+        margin-bottom: 10px;
+        justify-content: flex-start; 
     }
     .event-center {
         min-height: auto; 
-        padding-left: 0; 
+        padding-left: 0;
+        text-align: left; 
     }
     /* 表格字體微調 */
     .tickets th, .tickets td {
@@ -251,6 +284,6 @@ h1 {
         font-size: 13px;
     }
     .tickets select {
-        width: 80px;
+        width: 110px;
     }
 }
