@@ -14,7 +14,11 @@ public class EventTicketTypeResponse {
     private BigDecimal customprice;
     private Integer customlimit;//庫存量
     private LocalDateTime createdat;
-    // private String remark;
     private String description;
+
+    //早鳥票相關
+    private Boolean earlyBirdEnabled;
+    private BigDecimal discountRate;
+    private BigDecimal finalPrice;
 
 }

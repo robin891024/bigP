@@ -23,7 +23,7 @@ export default function SelectTicket() {
   const [rollbackTimer, setRollbackTimer] = useState(null);
 
   const totalAmount = tickets.reduce(
-    (acc, t) => acc + (t.selectedQty || 0) * Number(t.customprice || 0),
+    (acc, t) => acc + (t.selectedQty || 0) * Number(t.finalPrice ?? t.customprice ?? 0),
     0
   );
   const totalTickets = tickets.reduce((acc, t) => acc + (t.selectedQty || 0), 0);
@@ -104,22 +104,33 @@ export default function SelectTicket() {
                   stockLimit = Number(t.customlimit ?? 0);
               }
           // 支援多種 price 欄位命名
+          
           const price = t.customprice ?? t.price ?? t.custom_price ?? 0;
-
+  
           // 優先取 id，若沒有 id 就使用 ticket_template_id 當 key（避免 key 為 undefined）
           const id = t.id ?? t.ticket_template_id ?? null;
 
           // 印出每筆原始物件與解析結果，方便 debug
           // console.log("ticket raw:", t, "=> resolved desc:", desc, "=> id:", id, "=> price:", price);
 
+          //早鳥票
+            const earlyBirdEnabled = t.earlyBirdEnabled ?? false;
+            const discountRate = t.discountRate ?? 0;
+            const finalPrice = t.finalPrice ?? price;
+
           return {
             id: id,
             ticket_template_id: t.ticket_template_id ?? null,
             ticketType: t.ticketType ?? t.name ?? "未命名票種",
+            finalPrice: finalPrice,
             customprice: price,
             description: desc,
             selectedQty: 0,
             customlimit: stockLimit,
+            //早鳥票相關欄位
+            earlyBirdEnabled: t.earlyBirdEnabled ?? false,
+            discountRate: t.discountRate ?? 0,
+            
           };
         });
 
@@ -246,7 +257,7 @@ export default function SelectTicket() {
 
       // 6.(此處為模擬) 準備傳送給支付系統的資料
       const createBody = {
-        userId: 3,//暫時寫死
+        // userId: 3,//暫時寫死
         eventId: eventId,
         items: checkoutItems.map((t) => ({
         eventTicketTypeId: t.eventTicketTypeId,
@@ -382,7 +393,7 @@ export default function SelectTicket() {
                     tickets.map((t) => (
                       <tr key={t.id ?? t.ticketType} data-ticket-id={t.id ?? ""}>
                         <td>{t.ticketType}</td>
-                        <td>{t.customprice}</td>
+                        <td>{t.finalPrice}</td>{/*t.customprice*/}
                         <td>
                           <select
                             className="ticketselct"

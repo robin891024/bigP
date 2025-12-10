@@ -1,5 +1,8 @@
 package com.example.openticket.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,11 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.openticket.dto.EventTicketTypeResponse;
 import com.example.openticket.entity.EventTicketType;
+import com.example.openticket.entity.TicketDiscountConfig;
 import com.example.openticket.repository.EventTicketTypeRep;
 
-// import tw.jay.springtest.DTO.Response.EventTicketTypeResponse;
-// import tw.jay.springtest.entity.EventTicketType;
-// import tw.jay.springtest.repository.EventTicketTypeRep;
+
 
 @Service
 public class EventTicketTypeService {
@@ -137,6 +139,67 @@ public class EventTicketTypeService {
 
         return updateRows > 0;
     }
+
+    
+    //早鳥票設置
+    private BigDecimal calculateFinalPrice(EventTicketType ett){
+        BigDecimal basePrice = ett.getCustomprice();//取得原價
+        
+        TicketDiscountConfig config = ett.getTicketDiscountConfig();
+        if(config == null){//若無設定早鳥，回傳原價
+            return basePrice.setScale(2, RoundingMode.HALF_UP);
+        }
+
+        //判斷是否在早鳥期間內
+        LocalDate event_start = ett.getEvent().getEvent_start();
+        LocalDate now = LocalDate.now();
+
+        int durationDays = config.getDuration_days();
+        //早鳥結束時間 = 活動開始日期 - 提前天數
+        LocalDate earlyBirdStart = event_start.minusDays(durationDays);
+
+        boolean inEarlyBird = now.isAfter(earlyBirdStart) && now.isBefore(event_start);
+        
+        if(!inEarlyBird){
+            return basePrice.setScale(2, RoundingMode.HALF_UP);
+        }
+        
+        //計算折扣後價格
+        BigDecimal discountRate = config.getDiscount_rate();//ex: 0.2 => 8折
+        BigDecimal multiplier = BigDecimal.ONE.subtract(discountRate);
+
+        BigDecimal finalPrice = basePrice.multiply(multiplier);
+        return finalPrice.setScale(2,  RoundingMode.HALF_UP);
+    }
+
+
+    //早鳥票DTO
+    private EventTicketTypeResponse mapToDtoWithEarlyBird(EventTicketType ett){
+        EventTicketTypeResponse dto = new EventTicketTypeResponse();
+        
+        dto.setId(ett.getId());
+        dto.setEventId(ett.getEvent().getId());
+        dto.setTicketType(ett.getTicketType().getName());
+        dto.setTicket_template_id(ett.getTicketType().getId());
+        dto.setIslimited(ett.getIslimited());
+        dto.setCustomprice(ett.getCustomprice());
+        dto.setCustomlimit(ett.getCustomlimit());
+        dto.setCreatedat(ett.getCreatedat());
+        dto.setDescription(ett.getTicketType().getDescription());
+
+        //早鳥票相關資訊
+        TicketDiscountConfig config = ett.getTicketDiscountConfig();
+        boolean earlyBirdEnabled = (config != null);
+
+        dto.setEarlyBirdEnabled(earlyBirdEnabled);
+        dto.setDiscountRate(earlyBirdEnabled ? (
+            config.getDiscount_rate() != null ? 
+            config.getDiscount_rate() : BigDecimal.ZERO) : BigDecimal.ZERO);
+        dto.setFinalPrice(calculateFinalPrice(ett));
+
+        return dto;
+        }
+
 
 }
 
