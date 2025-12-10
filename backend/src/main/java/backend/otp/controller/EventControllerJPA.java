@@ -28,6 +28,7 @@ public class EventControllerJPA {
         return eventsService.getallEvent();
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getEvent(@PathVariable Long id) {
         return eventsService.getEventById(id)
@@ -47,4 +48,21 @@ public class EventControllerJPA {
                 .orElse(ResponseEntity.notFound().build());// 如果沒有就回傳404
 
     }
+
+    //DTO版本
+    // @GetMapping("/{id}")
+    // public ResponseEntity<Event> getEvent(@PathVariable Long id) {
+    //     return eventsService.getEventById(id)
+    //             .map(event -> {
+    //                 Event dto = new Event();
+    //                 dto.setId(event.getId());
+    //                 dto.setTitle(event.getTitle());
+    //                 dto.setAddress(event.getAddress());
+    //                 dto.setEvent_start(event.getEvent_start());
+    //                 dto.setEvent_end(event.getEvent_end());
+    //                 // 根據需要設置其他屬性
+    //                 return ResponseEntity.ok(dto);
+    //             })
+    //             .orElse(ResponseEntity.notFound().build());
+    // }
 }
