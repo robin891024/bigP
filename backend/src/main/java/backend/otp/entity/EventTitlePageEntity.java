@@ -1,37 +1,35 @@
-package backend.otp.dto;
+package backend.otp.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "event_title_page")
-public class EventTitlePage {
+public class EventTitlePageEntity {
 
-    // 根據您的資料庫截圖，id 是主鍵
     @Id
     private Long id;
 
-    // 映射 image_url 欄位
-    @Column(name = "image_url") 
-    private String imageUrl; // CamelCase for Java property
+    @Column(name = "event_id")
+    private Long eventId;
 
-    // 建立時間 (可選，但最好包含)
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "created_at")
-    private String createdAt; 
-    
-    // Spring Data JPA 需要無參數建構子
-    public EventTitlePage() {}
+    private LocalDateTime createdAt;
 
-    // 完整的建構子 (可選)
-    public EventTitlePage(Long id, String imageUrl, String createdAt) {
+    public EventTitlePageEntity() {}
+
+    public EventTitlePageEntity(Long id, Long eventId, String imageUrl, LocalDateTime createdAt) {
         this.id = id;
+        this.eventId = eventId;
         this.imageUrl = imageUrl;
         this.createdAt = createdAt;
     }
-
-    // --- Getter and Setter ---
 
     public Long getId() {
         return id;
@@ -39,6 +37,14 @@ public class EventTitlePage {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Long eventId) {
+        this.eventId = eventId;
     }
 
     public String getImageUrl() {
@@ -49,11 +55,11 @@ public class EventTitlePage {
         this.imageUrl = imageUrl;
     }
 
-    public String getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }

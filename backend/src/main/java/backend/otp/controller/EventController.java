@@ -6,6 +6,7 @@ import backend.otp.dto.EventDailyStatsDto;
 import backend.otp.repository.EventRepository;
 import backend.otp.repository.EventDetailRepository;
 import backend.otp.repository.EventRepositoryJPA;
+import backend.otp.repository.EventTitlePageRepository;
 import backend.otp.service.EventStatsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,13 +24,16 @@ public class EventController {
 	private final EventStatsService eventStatsService;
 	private final EventDetailRepository eventDetailRepository;
 	private final EventRepositoryJPA eventRepositoryJPA;
+	private final EventTitlePageRepository eventTitlePageRepository;
 
 	public EventController(EventRepository eventRepository, EventStatsService eventStatsService,
-			EventDetailRepository eventDetailRepository, EventRepositoryJPA eventRepositoryJPA) {
+			EventDetailRepository eventDetailRepository, EventRepositoryJPA eventRepositoryJPA,
+			EventTitlePageRepository eventTitlePageRepository) {
 		this.eventRepository = eventRepository;
 		this.eventStatsService = eventStatsService;
 		this.eventDetailRepository = eventDetailRepository;
 		this.eventRepositoryJPA = eventRepositoryJPA;
+		this.eventTitlePageRepository = eventTitlePageRepository;
 	}
 
 	@GetMapping
@@ -41,12 +45,28 @@ public class EventController {
 	@GetMapping("/detail/{id}")
 	public ResponseEntity<Event> getEventById(@PathVariable Long id) {
 		return eventRepositoryJPA.findById(id)
-				.map(eventJpa -> new Event(
-						eventJpa.getId(),
-						"/images/test.jpg", // 目前圖片路徑寫死，與 JDBC 版本一致
-						eventJpa.getAddress(),
-						eventJpa.getEvent_start() != null ? eventJpa.getEvent_start().toString() : "",
-						eventJpa.getTitle()))
+				.map(eventJpa -> {
+					String imageUrl = eventTitlePageRepository.findFirstByEventIdOrderByCreatedAtDesc(id)
+							.map(img -> {
+								String path = img.getImageUrl();
+								// Extract filename if it's a path
+								if (path.contains("/")) {
+									path = path.substring(path.lastIndexOf("/") + 1);
+								}
+								if (path.contains("\\")) {
+									path = path.substring(path.lastIndexOf("\\") + 1);
+								}
+								return "/api/images/covers/" + path;
+							})
+							.orElse("/api/images/covers/test.jpg");
+
+					return new Event(
+							eventJpa.getId(),
+							imageUrl,
+							eventJpa.getAddress(),
+							eventJpa.getEvent_start() != null ? eventJpa.getEvent_start().toString() : "",
+							eventJpa.getTitle());
+				})
 				.map(ResponseEntity::ok)
 				.orElse(ResponseEntity.notFound().build());
 	}
