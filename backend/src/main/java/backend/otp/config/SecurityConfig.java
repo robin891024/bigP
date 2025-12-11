@@ -88,7 +88,9 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                 "/api/images/**",
                 "/oauth2/**",
                 "/oauth2/**",
-                "/loginLog/add"
+                "/loginLog/add",
+                "/swagger-ui/**",
+                "/v3/api-docs/**"
             ).permitAll()
 
             // 其他全部需要 JWT

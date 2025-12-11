@@ -42,7 +42,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || path.startsWith("/api/announcements") // 允許 /api/announcements 和 /api/announcements/**
                 || path.startsWith("/api/events") // 允許 /api/events 和 /api/events/**
                 || path.startsWith("/api/images") // 允許 /api/images 和 /api/images/**
-                || path.startsWith("/api/log/session")) {
+                || path.startsWith("/api/log/session")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs")) {
             filterChain.doFilter(request, response);
             return;
         }
