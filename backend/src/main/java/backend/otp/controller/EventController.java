@@ -1,9 +1,8 @@
 package backend.otp.controller;
 
-import backend.otp.dto.Event;
+import backend.otp.dto.EventDto;
 import backend.otp.dto.EventStatsDto;
 import backend.otp.dto.EventDailyStatsDto;
-import backend.otp.repository.EventRepository;
 import backend.otp.repository.EventDetailRepository;
 import backend.otp.repository.EventRepositoryJPA;
 import backend.otp.repository.EventTitlePageRepository;
@@ -16,20 +15,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+import java.util.Comparator;
+import backend.otp.entity.EventJpa;
+import backend.otp.entity.EventTitlePageEntity;
 
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
-	private final EventRepository eventRepository;
 	private final EventStatsService eventStatsService;
 	private final EventDetailRepository eventDetailRepository;
 	private final EventRepositoryJPA eventRepositoryJPA;
 	private final EventTitlePageRepository eventTitlePageRepository;
 
-	public EventController(EventRepository eventRepository, EventStatsService eventStatsService,
+	public EventController(EventStatsService eventStatsService,
 			EventDetailRepository eventDetailRepository, EventRepositoryJPA eventRepositoryJPA,
 			EventTitlePageRepository eventTitlePageRepository) {
-		this.eventRepository = eventRepository;
 		this.eventStatsService = eventStatsService;
 		this.eventDetailRepository = eventDetailRepository;
 		this.eventRepositoryJPA = eventRepositoryJPA;
@@ -37,19 +40,55 @@ public class EventController {
 	}
 
 	@GetMapping
-	public List<Event> getAllEvents() {
-		return eventRepository.findAll();
+	public List<EventDto> getAllEvents() {
+		// 1. 取得所有活動
+		List<EventJpa> events = eventRepositoryJPA.findAll();
+		
+		// 2. 取得所有圖片資訊 (按建立時間倒序)
+		List<EventTitlePageEntity> images = eventTitlePageRepository.findAllByOrderByCreatedAtDesc();
+		
+		// 3. 建立 EventId -> ImageUrl 的 Map (只保留最新的)
+		Map<Long, String> imageMap = new HashMap<>();
+		for (EventTitlePageEntity img : images) {
+			imageMap.putIfAbsent(img.getEventId(), img.getImageUrl());
+		}
+
+		// 4. 轉換為 DTO 並回傳 (按 ID 倒序排列，與原本 JDBC 行為一致)
+		return events.stream()
+				.sorted(Comparator.comparing(EventJpa::getId).reversed())
+				.map(eventJpa -> {
+					String imageUrl = imageMap.getOrDefault(eventJpa.getId(), "/api/images/covers/test.jpg");
+					
+					// 處理圖片路徑轉換
+					if (!imageUrl.equals("/api/images/covers/test.jpg")) {
+						String path = imageUrl;
+						if (path.contains("/")) {
+							path = path.substring(path.lastIndexOf("/") + 1);
+						}
+						if (path.contains("\\")) {
+							path = path.substring(path.lastIndexOf("\\") + 1);
+						}
+						imageUrl = "/api/images/covers/" + path;
+					}
+
+					return new EventDto(
+							eventJpa.getId(),
+							imageUrl,
+							eventJpa.getAddress(),
+							eventJpa.getEvent_start() != null ? eventJpa.getEvent_start().toString() : "",
+							eventJpa.getTitle());
+				})
+				.collect(Collectors.toList());
 	}
 
-	// 取得單一活動 (JPA)
+	// 取得單一活動
 	@GetMapping("/detail/{id}")
-	public ResponseEntity<Event> getEventById(@PathVariable Long id) {
+	public ResponseEntity<EventDto> getEventById(@PathVariable Long id) {
 		return eventRepositoryJPA.findById(id)
 				.map(eventJpa -> {
 					String imageUrl = eventTitlePageRepository.findFirstByEventIdOrderByCreatedAtDesc(id)
 							.map(img -> {
 								String path = img.getImageUrl();
-								// Extract filename if it's a path
 								if (path.contains("/")) {
 									path = path.substring(path.lastIndexOf("/") + 1);
 								}
@@ -60,7 +99,7 @@ public class EventController {
 							})
 							.orElse("/api/images/covers/test.jpg");
 
-					return new Event(
+					return new EventDto(
 							eventJpa.getId(),
 							imageUrl,
 							eventJpa.getAddress(),
