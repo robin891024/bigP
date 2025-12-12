@@ -29,8 +29,8 @@ public class CheckoutOrders {
     @JoinColumn(name = "event_ticket_type_id")
     private EventTicketType eventTicketType;
 
-    @Column(name="price_at_purchase", precision=10, scale=2)
-    private BigDecimal priceAtPurchase;
+    @Column(name="unit_price", precision=10, scale=2)
+    private BigDecimal unitPrice;
 
     private int quantity;
 }

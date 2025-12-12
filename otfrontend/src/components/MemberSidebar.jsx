@@ -116,7 +116,7 @@ function MemberSidebar() {
                             className={`nav-item ${activeTab === "history" ? "active" : ""}`}
                             onClick={(e) => {
                                 e.preventDefault();
-                                navigate("/member/history");
+                                navigate("/member/history", { state: { id: memberId } });
                             }}
                         >
                             <span className="material-symbols-outlined unfilled">receipt_long</span>

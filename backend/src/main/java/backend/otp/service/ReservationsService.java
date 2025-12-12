@@ -156,6 +156,11 @@ public class ReservationsService {
         return response;
     }
 
+    //用userId檢索reservationId
+    public List<Long> searchReservationId (Long userId) {
+        return repositoryrepo.findAllIdByUser_Id(userId);
+    } 
+
 }
 
 // 無法一次紀錄兩種不同的票種

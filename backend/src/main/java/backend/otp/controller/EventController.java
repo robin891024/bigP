@@ -1,27 +1,27 @@
 package backend.otp.controller;
 
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import backend.otp.dto.EventDailyStatsDto;
 import backend.otp.dto.EventDto;
 import backend.otp.dto.EventStatsDto;
-import backend.otp.dto.EventDailyStatsDto;
+import backend.otp.entity.EventJpa;
+import backend.otp.entity.EventTitlePageEntity;
 import backend.otp.repository.EventDetailRepository;
 import backend.otp.repository.EventRepositoryJPA;
 import backend.otp.repository.EventTitlePageRepository;
 import backend.otp.service.EventStatsService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.stream.Collectors;
-import java.util.Comparator;
-import backend.otp.entity.EventJpa;
-import backend.otp.entity.EventTitlePageEntity;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

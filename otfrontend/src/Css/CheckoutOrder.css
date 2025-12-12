@@ -1,0 +1,373 @@
+/* CheckoutOrder.css */
+/* 引入 MemberPage 的樣式 */
+@import './MemberPage.css';
+
+.checkout-page {
+    flex: 1;
+}
+
+.checkout-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Loading State */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5rem 0;
+    color: #64748b;
+}
+
+/* Empty State */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 2.5rem 1rem;
+    margin-top: 2.5rem;
+    border: 2px dashed #cbd5e1;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.dark .empty-state {
+    border-color: #475569;
+}
+
+.empty-state-icon {
+    width: 4rem;
+    height: 4rem;
+    color: #197fe6;
+}
+
+.empty-state-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.dark .empty-state-title {
+    color: #f1f5f9;
+}
+
+.empty-state-description {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+/* Table Container */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.checkout-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    table-layout: fixed;
+}
+
+/* Table Header */
+.checkout-table thead {
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dark .checkout-table thead {
+    border-color: #334155;
+}
+
+.checkout-table thead tr {
+    background-color: transparent;
+}
+
+.checkout-table th {
+    padding: 1rem 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.dark .checkout-table th {
+    color: #94a3b8;
+}
+
+/* 欄位寬度設定 */
+.checkout-table th:nth-child(1),
+.checkout-table td:nth-child(1) {
+    width: 5%;
+}
+
+.checkout-table th:nth-child(2),
+.checkout-table td:nth-child(2) {
+    width: 25%;
+}
+
+.checkout-table th:nth-child(3),
+.checkout-table td:nth-child(3) {
+    width: 15%;
+}
+
+.checkout-table th:nth-child(4),
+.checkout-table td:nth-child(4) {
+    width: 10%;
+}
+
+.checkout-table th:nth-child(5),
+.checkout-table td:nth-child(5) {
+    width: 8%;
+}
+
+.checkout-table th:nth-child(6),
+.checkout-table td:nth-child(6) {
+    width: 20%;
+}
+
+.checkout-table th:nth-child(7),
+.checkout-table td:nth-child(7) {
+    width: 12%;
+}
+
+/* Table Body */
+.checkout-table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s;
+}
+
+.dark .checkout-table tbody tr {
+    border-bottom-color: #334155;
+}
+
+.checkout-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.checkout-table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.dark .checkout-table tbody tr:hover {
+    background-color: #334155;
+}
+
+.checkout-table td {
+    height: 3.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.table-index {
+    color: #64748b;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.dark .table-index {
+    color: #94a3b8;
+}
+
+.table-event-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #0e141b;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.dark .table-event-name {
+    color: #f1f5f9;
+}
+
+.table-info {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.dark .table-info {
+    color: #94a3b8;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* 待付款 - 黃色 */
+.status-badge.status-pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.dark .status-badge.status-pending {
+    background-color: rgba(245, 158, 11, 0.5);
+    color: #fcd34d;
+}
+
+/* 已付款 - 藍色 */
+.status-badge.status-paid {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.dark .status-badge.status-paid {
+    background-color: rgba(37, 99, 235, 0.5);
+    color: #93c5fd;
+}
+
+/* 已完成 - 綠色 */
+.status-badge.status-completed {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.dark .status-badge.status-completed {
+    background-color: rgba(22, 163, 74, 0.5);
+    color: #86efac;
+}
+
+/* 已取消 - 紅色 */
+.status-badge.status-cancelled {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.dark .status-badge.status-cancelled {
+    background-color: rgba(220, 38, 38, 0.5);
+    color: #fca5a5;
+}
+
+/* 退款中 - 橘色 */
+.status-badge.status-refunding {
+    background-color: #fed7aa;
+    color: #9a3412;
+}
+
+.dark .status-badge.status-refunding {
+    background-color: rgba(234, 88, 12, 0.5);
+    color: #fdba74;
+}
+
+/* 已退款 - 灰色 */
+.status-badge.status-refunded {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
+.dark .status-badge.status-refunded {
+    background-color: #475569;
+    color: #cbd5e1;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.pagination-button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
+    background-color: white;
+    color: #64748b;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.dark .pagination-button {
+    border-color: #475569;
+    background-color: #1e293b;
+    color: #94a3b8;
+}
+
+.pagination-button:hover:not(:disabled) {
+    background-color: #f8fafc;
+    border-color: #197fe6;
+    color: #197fe6;
+}
+
+.dark .pagination-button:hover:not(:disabled) {
+    background-color: rgba(51, 65, 85, 0.5);
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-button.active {
+    background-color: #197fe6;
+    color: white;
+    border-color: #197fe6;
+}
+
+.pagination-info {
+    padding: 0.5rem 1rem;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.dark .pagination-info {
+    color: #94a3b8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .table-column-ticket {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .table-column-price,
+    .table-column-quantity {
+        display: none;
+    }
+    
+    .checkout-page {
+        padding: 1.5rem 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .table-column-date {
+        display: none;
+    }
+    
+    .checkout-container {
+        padding: 0 1rem;
+    }
+    
+    .checkout-table th,
+    .checkout-table td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .table-event-name {
+        font-size: 0.9rem;
+    }
+}

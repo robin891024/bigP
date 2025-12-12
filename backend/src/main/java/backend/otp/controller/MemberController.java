@@ -504,27 +504,50 @@ public class MemberController {
             response.put("message", "Token 已過期,請重新發送驗證碼");
             return ResponseEntity.badRequest().body(response);
         }
-        // 3. 檢查嘗試次數 (使用 Redis)
-        if (!verificationService.canAttempt(email)) {
+        // 3. 檢查是否被鎖定
+        if (verificationService.isLocked(email)) {
+            long lockTime = verificationService.getLockRemainingTime(email);
             response.put("success", false);
-            response.put("message", "驗證碼錯誤次數過多,請重新發送驗證碼");
+            response.put("locked", true);
+            response.put("lockRemainingTime", lockTime);
+            response.put("message", "驗證失敗次數過多,請等待 " + lockTime + " 秒後再試");
             response.put("remainingAttempts", 0);
             return ResponseEntity.badRequest().body(response);
         }
-        // 4. 驗證驗證碼
+        
+        // 4. 檢查嘗試次數
+        if (!verificationService.canAttempt(email)) {
+            response.put("success", false);
+            response.put("message", "驗證碼錯誤次數過多");
+            response.put("remainingAttempts", 0);
+            return ResponseEntity.badRequest().body(response);
+        }
+        // 5. 驗證驗證碼
         String validatedEmail = jwt.validateEmailVerificationToken(token, code);
         if (validatedEmail == null) {
             // 驗證失敗,增加嘗試次數
             int attempts = verificationService.incrementAttempts(email);
             int remaining = verificationService.getRemainingAttempts(email);
-            response.put("success", false);
-            response.put("message", "驗證碼錯誤,還剩 " + remaining + " 次機會");
-            response.put("remainingAttempts", remaining);
+            
+            // 檢查是否達到最大嘗試次數並被鎖定
+            if (verificationService.isLocked(email)) {
+                long lockTime = verificationService.getLockRemainingTime(email);
+                response.put("success", false);
+                response.put("locked", true);
+                response.put("lockRemainingTime", lockTime);
+                response.put("message", "驗證失敗次數過多,請等待 " + lockTime + " 秒後再試");
+                response.put("remainingAttempts", 0);
+            } else {
+                response.put("success", false);
+                response.put("locked", false);
+                response.put("message", "驗證碼錯誤,還剩 " + remaining + " 次機會");
+                response.put("remainingAttempts", remaining);
+            }
             return ResponseEntity.badRequest().body(response);
         }
-        // 5. 驗證成功,清除嘗試次數
+        // 6. 驗證成功,清除嘗試次數和鎖定
         verificationService.clearAttempts(email);
-        // 6. 生成註冊 Token
+        // 7. 生成註冊 Token
         String registrationToken = jwt.generateRegistrationToken(validatedEmail);
         response.put("success", true);
         response.put("message", "信箱驗證成功");

@@ -17,6 +17,8 @@ function Register() {
     const [verificationCode, setVerificationCode] = useState("");
     const [countdown, setCountdown] = useState(0);
     const [verifiedEmail, setVerifiedEmail] = useState("");
+    const [isLocked, setIsLocked] = useState(false);
+    const [lockCountdown, setLockCountdown] = useState(0);
 
     // 表單欄位
     const [email_f, setEmail_f] = useState("");
@@ -237,16 +239,29 @@ function Register() {
 
                 showAlert("✅ 信箱驗證成功,請在 10 分鐘內完成註冊", "success");
             } else {
-                if (data.remainingAttempts !== undefined) {
+                // 檢查是否被鎖定
+                if (data.locked) {
+                    setIsLocked(true);
+                    setLockCountdown(data.lockRemainingTime);
+                    setRemainingAttempts(0);
+                    showAlert(`❌ ${data.message}`, "error");
+                    
+                    // 開始鎖定倒數計時
+                    const lockTimer = setInterval(() => {
+                        setLockCountdown(prev => {
+                            if (prev <= 1) {
+                                clearInterval(lockTimer);
+                                setIsLocked(false);
+                                setRemainingAttempts(5);
+                                showAlert("✅ 可以重新嘗試了,請重新發送驗證碼", "success");
+                                return 0;
+                            }
+                            return prev - 1;
+                        });
+                    }, 1000);
+                } else if (data.remainingAttempts !== undefined) {
                     setRemainingAttempts(data.remainingAttempts);
                     showAlert(`❌ ${data.message}`, "error");
-
-                    if (data.remainingAttempts === 0) {
-                        setTimeout(() => {
-                            setVerificationStep(1);
-                            setVerificationCode("");
-                        }, 2000);
-                    }
                 } else {
                     showAlert(`❌ ${data.message}`, "error");
                 }
@@ -472,9 +487,23 @@ function Register() {
                                         }}
                                         placeholder="請輸入6位數驗證碼"
                                         maxLength="6"
-                                        disabled={isLoading}
+                                        disabled={isLoading || isLocked}
                                     />
-                                    {remainingAttempts < 5 && (
+                                    {isLocked ? (
+                                        <div className="lock-warning" style={{
+                                            color: '#dc3545',
+                                            fontSize: '14px',
+                                            marginTop: '8px',
+                                            padding: '12px',
+                                            backgroundColor: '#fff3cd',
+                                            border: '1px solid #ffc107',
+                                            borderRadius: '4px',
+                                            textAlign: 'center'
+                                        }}>
+                                            🔒 驗證失敗次數過多<br/>
+                                            請等待 <strong>{Math.floor(lockCountdown / 60)}:{String(lockCountdown % 60).padStart(2, '0')}</strong> 後再試
+                                        </div>
+                                    ) : remainingAttempts < 5 && (
                                         <div className="attempts-warning">
                                             ⚠️ 剩餘嘗試次數: {remainingAttempts} 次
                                         </div>
@@ -485,13 +514,17 @@ function Register() {
                                     type="button"
                                     className="btn-primary"
                                     onClick={verifyCode}
-                                    disabled={isLoading || verificationCode.length !== 6}
+                                    disabled={isLoading || verificationCode.length !== 6 || isLocked}
                                 >
-                                    {isLoading ? "驗證中..." : "驗證"}
+                                    {isLoading ? "驗證中..." : isLocked ? "已鎖定" : "驗證"}
                                 </button>
 
                                 <div className="resend-section">
-                                    {countdown > 0 ? (
+                                    {isLocked ? (
+                                        <p className="countdown-text" style={{ color: '#dc3545' }}>
+                                            鎖定中,無法重新發送
+                                        </p>
+                                    ) : countdown > 0 ? (
                                         <p className="countdown-text">
                                             {countdown} 秒後可重新發送
                                         </p>
@@ -502,6 +535,8 @@ function Register() {
                                             onClick={() => {
                                                 setVerificationStep(1);
                                                 setVerificationCode("");
+                                                setIsLocked(false);
+                                                setLockCountdown(0);
                                             }}
                                         >
                                             重新發送驗證碼
