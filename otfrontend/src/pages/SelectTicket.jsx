@@ -27,27 +27,35 @@ export default function SelectTicket() {
     0
   );
   const totalTickets = tickets.reduce((acc, t) => acc + (t.selectedQty || 0), 0);
-  const selectedTicketsArray = tickets
+
+  //恢復原狀
+
+  const selectedTicketText = tickets
     .filter((t) => t.selectedQty > 0)
     .map((t) => `${t.ticketType} ${t.selectedQty}張`)
+    .join("/");
 
-    const MAX_TICKETS_PER_LINE = 2;
+//   const selectedTicketsArray = tickets
+//     .filter((t) => t.selectedQty > 0)
+//     .map((t) => `${t.ticketType} ${t.selectedQty}張`)
 
-    let selectedTicketText = "";
-    for (let i = 0; i < selectedTicketsArray.length; i++) {
-    selectedTicketText += selectedTicketsArray[i];
+//     const MAX_TICKETS_PER_LINE = 2;
 
-    if (i < selectedTicketsArray.length - 1) {
-      // 如果不是最後一個項目
-      if ((i + 1) % MAX_TICKETS_PER_LINE === 0) {
-        // 每隔 N 個項目後換行
-        selectedTicketText += " / \n"; // 插入斜線和換行符
-      } else {
-        // 其他項目間使用斜線分隔
-        selectedTicketText += " / ";
-      }
-    }
-  }
+//     let selectedTicketText = "";
+//     for (let i = 0; i < selectedTicketsArray.length; i++) {
+//     selectedTicketText += selectedTicketsArray[i];
+
+//     if (i < selectedTicketsArray.length - 1) {
+//       // 如果不是最後一個項目
+//       if ((i + 1) % MAX_TICKETS_PER_LINE === 0) {
+//         // 每隔 N 個項目後換行
+//         selectedTicketText += " / \n"; // 插入斜線和換行符
+//       } else {
+//         // 其他項目間使用斜線分隔
+//         selectedTicketText += " / ";
+//       }
+//     }
+//   }
   //載入活動資料
   useEffect(() => {
     if (!eventId) return;

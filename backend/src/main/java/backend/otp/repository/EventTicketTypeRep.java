@@ -1,6 +1,7 @@
 package backend.otp.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -48,5 +49,12 @@ public interface EventTicketTypeRep extends JpaRepository<EventTicketType, Long>
     @Query("UPDATE EventTicketType ett SET ett.customlimit = ett.customlimit - :quantity " +
            "WHERE ett.id = :id AND ett.islimited = true AND ett.customlimit >= :quantity")
     int decreaseLimitedStock(@Param("id") Long id, @Param("quantity") int quantity);
+
+    //查詢某活動的所有早鳥票
+       @Query("select ett from EventTicketType ett " +
+              "left join fetch ett.ticketDiscountConfig tdc " +
+              "left join fetch ett.event e " +
+              "where ett.id = :id")
+       Optional<EventTicketType> findByIdWithDiscountAndEvent(@Param("id") Long id);
 
 }

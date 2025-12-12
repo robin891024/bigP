@@ -246,6 +246,69 @@ h1 {
 .btn:hover { background: #3b7acc; }
 
 
+早鳥票優惠
+.tickets tr.early-bird-row {
+    background-color: #FFF5E6; /* 極淺的暖橘色背景 */
+    transition: background-color 0.3s ease;
+}
+
+/* 2. 票種名稱高亮 */
+.tickets td.early-bird-name {
+    color: #FF7700; /* 暖橘色文字 */
+    font-weight: bold;
+}
+
+/* 3. 票價顯示優化 */
+/* 原價 (劃線) */
+.original-price {
+    color: #999;
+    text-decoration: line-through; /* 劃掉原價 */
+    font-size: 0.9em;
+    margin-right: 5px;
+    display: block; /* 讓它佔據一行 */
+}
+
+/* 優惠價 (高亮) */
+.final-price-highlight {
+    color: #CC0000; /* 醒目的紅色或深橘色 */
+    font-weight: bold;
+    font-size: 1.1em;
+}
+/* 4. 提示文字列的容器 */
+.early-bird-message-row {
+    /* 移除頂部邊框，讓它和上面的票種列更緊密 */
+    border-top: none !important; 
+    /* 讓它和下一行之間有間隔 */
+    border-bottom: 5px solid #f8f9fa; /* 與底色相同的間隔線 */
+    /* 調整高度 */
+    height: 10px;
+}
+
+/* 提示文字本身的樣式 */
+.early-bird-message {
+    /* 讓它看起來像一個橫幅，寬度撐滿 */
+    background-color: #FF7700; /* 醒目的橘色背景 */
+    color: white; /* 白色文字 */
+    font-weight: 600;
+    font-size: 0.9em;
+    padding: 5px 15px;
+    text-align: center;
+    /* 圓角與外容器對齊 */
+    border-radius: 0; 
+    /* 移除表格線，只保留背景色 */
+    border: none !important;
+}
+
+/* 提示文字內的 span，用於調整字體細節 */
+.early-bird-text {
+    display: block; /* 確保內容居中 */
+}
+
+/* 確保當早鳥票訊息顯示時，下一行的頂部邊框距離適當 */
+.tickets tr:not(.early-bird-message-row) td {
+    border-top: 1px solid #ddd;
+}
+
 /* ====== 響應式設計 (Media Queries) ====== */
 
 /* 螢幕小於 600px：微調為單欄堆疊 */
