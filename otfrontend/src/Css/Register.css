@@ -333,10 +333,13 @@ form {
         opacity: 0;
         transform: translate(-50%, -30px);
     }
-    10%, 90% {
+
+    10%,
+    90% {
         opacity: 1;
         transform: translate(-50%, 0);
     }
+
     100% {
         opacity: 0;
         transform: translate(-50%, -30px);
@@ -348,6 +351,7 @@ form {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -363,12 +367,12 @@ form {
     .register-page {
         padding: 1.5rem 1rem;
     }
-    
+
     .register-card {
         padding: 1.5rem;
         margin: 0.5rem 0;
     }
-    
+
     .register-header h1 {
         font-size: 2rem;
     }
@@ -379,16 +383,16 @@ form {
     .register-page {
         padding: 1rem 0.5rem;
     }
-    
+
     .register-card {
         padding: 1.25rem;
         margin: 0.5rem 0;
     }
-    
+
     .register-header h1 {
         font-size: 1.75rem;
     }
-    
+
     .form-group input[type="text"],
     .form-group input[type="password"],
     .location-select,
@@ -396,12 +400,12 @@ form {
         height: 3rem;
         font-size: 0.9375rem;
     }
-    
+
     .email-separator {
         height: 3rem;
         padding: 0 0.5rem;
     }
-    
+
     .alert-bar {
         min-width: 16rem;
         padding: 0.875rem 1.25rem;
@@ -483,29 +487,30 @@ form {
 .dark .login-link {
     color: #94a3b8;
 }
+
 /* 深色模式支援 (可選) */
 @media (prefers-color-scheme: dark) {
     .register-page {
         background: #111921;
     }
-    
+
     .register-card {
         background: #1e293b;
         border-color: #334155;
     }
-    
+
     .register-header h1 {
         color: #f1f5f9;
     }
-    
+
     .subtitle {
         color: #94a3b8;
     }
-    
+
     .form-group label {
         color: #f1f5f9;
     }
-    
+
     .form-group input[type="text"],
     .form-group input[type="password"],
     .location-select {
@@ -513,28 +518,269 @@ form {
         border-color: #334155;
         color: #f1f5f9;
     }
-    
+
     .form-group input:focus,
     .location-select:focus {
         background: #111921;
         border-color: #197fe6;
     }
-    
+
     .form-group input::placeholder {
         color: #64748b;
     }
-    
+
     .email-separator {
         background: rgba(15, 23, 42, 0.5);
         border-color: #334155;
         color: #94a3b8;
     }
-    
+
     .toggle-password {
         color: #94a3b8;
     }
-    
+
     .login-link {
         color: #94a3b8;
     }
+}
+
+/* 步驟指示器 */
+.step-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1.5rem 0 2rem;
+    padding: 0 1rem;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.step-number {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+    background: #197fe6;
+    color: white;
+}
+
+.step-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+    text-align: center;
+}
+
+.step.active .step-label {
+    color: #197fe6;
+    font-weight: 600;
+}
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: #e2e8f0;
+    margin: 0 0.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.step-line.active {
+    background: #197fe6;
+}
+
+/* 步驟內容 */
+.step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+/* 驗證碼輸入框 */
+.verification-code-input {
+    text-align: center;
+    font-size: 1.5rem !important;
+    letter-spacing: 0.5rem;
+    font-weight: 600;
+}
+
+/* 驗證信息顯示 */
+.verification-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.verification-info .material-symbols-outlined {
+    font-size: 2.5rem;
+    color: #197fe6;
+}
+
+.verification-info p {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.verification-info strong {
+    color: #0e141b;
+    font-size: 1rem;
+}
+
+/* 重新發送區域 */
+.resend-section {
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.countdown-text {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: #197fe6;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.btn-link:hover {
+    color: #1570cc;
+}
+
+/* 已驗證信箱顯示 */
+.verified-email-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 0.5rem;
+}
+
+.verified-email-display .material-symbols-outlined {
+    color: #16a34a;
+    font-size: 1.5rem;
+}
+
+.verified-email-display span:last-child {
+    color: #0e141b;
+    font-weight: 600;
+}
+
+/* 深色模式支援 */
+.dark .step-number {
+    background: #334155;
+    color: #94a3b8;
+}
+
+.dark .step.active .step-number {
+    background: #197fe6;
+    color: white;
+}
+
+.dark .step-label {
+    color: #94a3b8;
+}
+
+.dark .step.active .step-label {
+    color: #197fe6;
+}
+
+.dark .step-line {
+    background: #334155;
+}
+
+.dark .verification-info {
+    background: rgba(25, 127, 230, 0.1);
+    border-color: rgba(25, 127, 230, 0.3);
+}
+
+.dark .verification-info p {
+    color: #94a3b8;
+}
+
+.dark .verification-info strong {
+    color: #f1f5f9;
+}
+
+.dark .verified-email-display {
+    background: rgba(22, 163, 74, 0.1);
+    border-color: rgba(22, 163, 74, 0.3);
+}
+
+.dark .verified-email-display span:last-child {
+    color: #f1f5f9;
+}
+
+.dark .countdown-text {
+    color: #94a3b8;
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+    .step-indicator {
+        padding: 0 0.5rem;
+    }
+
+    .step-number {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.875rem;
+    }
+
+    .step-label {
+        font-size: 0.625rem;
+    }
+
+    .verification-code-input {
+        font-size: 1.25rem !important;
+        letter-spacing: 0.25rem;
+    }
+}
+
+.attempts-warning {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    color: #856404;
+    font-size: 14px;
+    text-align: center;
+}
+
+[data-theme="dark"] .attempts-warning {
+    background-color: #664d03;
+    border-color: #997404;
+    color: #ffecb5;
 }

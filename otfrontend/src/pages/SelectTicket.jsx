@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Breadcrumb from "../components/Breadcrumb";
+import { useNavigate } from "react-router-dom";
 import '../Css/SelectTicket.css';
 
 // **** 設定Spring Boot基礎URL ****
@@ -16,6 +17,7 @@ export default function SelectTicket() {
   const [event, setEvent] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   //防止重複點擊
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -280,14 +282,14 @@ export default function SelectTicket() {
       // setMessage(`庫存保留: ${totalTickets} 張票券，請於3分鐘內完成付款`);
 
       // 6.(此處為模擬) 準備傳送給支付系統的資料
-      const createBody = {
+   const createBody = {
         // userId: 3,//暫時寫死
-        eventId: eventId,
-        items: checkoutItems.map((t) => ({
+    eventId: eventId,
+     items: checkoutItems.map((t) => ({
         eventTicketTypeId: t.eventTicketTypeId,
         quantity: t.quantity,
         })),
-      };
+   };
 
       console.log(tickets.map(t => ({id: t.id, name: t.ticketType})));
       console.log("送後端的 createBody：", createBody);
@@ -308,9 +310,35 @@ export default function SelectTicket() {
         setMessage("訂單建立成功，準備前往付款...");
 
         // 取回 orderId（若後端欄位不同請改名）
-        const orderId = respJson.orderId ?? respJson.id ?? respJson.order_id ?? null;
-        const reservationId = respJson.reservationId ?? respJson.reservation_id ?? null;
+        // const orderId = respJson.orderId ?? respJson.id ?? respJson.order_id ?? null;
+        // const reservationId = respJson.reservationId ?? respJson.reservation_id ?? null;
 
+        const orderId = respJson.orderId ?? respJson.id ?? respJson.order_id ?? null;
+        const reservationId = respJson.reservations_id ?? respJson.reservationId ?? respJson.reservation_id ?? null;
+
+        if (reservationId) {
+            // 📌 核心導航邏輯：導向 /checkout/1033 (例如)
+            navigate(`/checkout/${reservationId}`); 
+            return; // 成功導航後，阻止 finally 執行
+      } else {
+      setMessage("訂單已建立，但無法取得結帳 ID，請檢查後端回傳格式。");
+      }
+    } else {
+      // 失敗：解析錯誤訊息並顯示
+      const text = await res.text();
+      console.error("建立訂單失敗：", res.status, text);
+      setMessage("建立訂單失敗：" + (text || res.status));
+    }
+    } catch (err) {
+    //處理例外
+    setMessage("結帳發生錯誤，請檢查網路連線或庫存狀況");
+    console.error("結帳失敗:", err);
+    loadTicketTypes(); 
+    }
+    finally {
+    setIsCheckingOut(false);
+    }
+  }
         
         //導到付款頁(目前未完成)
         //  if (orderId) {
@@ -339,21 +367,21 @@ export default function SelectTicket() {
         //       // 無論成功或失敗，都要解除按鈕鎖定（除非 redirect 已經發生）
         //       setIsCheckingOut(false);
         //     }
-        }
-      console.log("📝 準備傳送的結帳資料 (JSON):");
-      console.log(JSON.stringify(createBody, null, 2));
-      console.log(createBody);
-      // 實際導向：window.location.href = "/payment.html";
-    } catch (err) {
-      //鎖庫存失敗，顯示錯誤給用戶
-      setMessage("此票種庫存不足");
-      console.error("結帳失敗:", err);
-      loadTicketTypes(); //重新載入票種以顯示最新庫存
-    }
-    finally {
-      setIsCheckingOut(false);
-    }
-  }
+        // }
+  //     console.log("📝 準備傳送的結帳資料 (JSON):");
+  //     console.log(JSON.stringify(createBody, null, 2));
+  //     console.log(createBody);
+  //     // 實際導向：window.location.href = "/payment.html";
+  //   } catch (err) {
+  //     //鎖庫存失敗，顯示錯誤給用戶
+  //     setMessage("此票種庫存不足");
+  //     console.error("結帳失敗:", err);
+  //     loadTicketTypes(); //重新載入票種以顯示最新庫存
+  //   }
+  //   finally {
+  //     setIsCheckingOut(false);
+  // }
+  // }
 
   //組件卸載時清除計時器，防止內存洩露
   // useEffect(() => {

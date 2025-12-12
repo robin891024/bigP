@@ -1,7 +1,6 @@
-
 package backend.otp.dto;
 
-public class Event {
+public class EventDto {
 	private Long id;
 	private String image;
 	private String address;
@@ -9,9 +8,9 @@ public class Event {
 	private String title;
 	
 
-	public Event() {}
+	public EventDto() {}
 
-	public Event(Long id, String image, String address, String eventStart, String title) {
+	public EventDto(Long id, String image, String address, String eventStart, String title) {
 		this.id = id;
 		this.image = image;
 		this.address = address;

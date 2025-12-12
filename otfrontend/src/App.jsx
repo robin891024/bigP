@@ -10,10 +10,15 @@ import Register from './pages/Register';
 import MemberPage from './pages/MemberPage';
 import SelectTicket from './pages/SelectTicket';
 import { ToastProvider } from './components/ToastContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import CheckoutPage from './pages/CheckoutPage'; 
+import SuccessPage from './pages/SuccessPage'; 
 
 
 function App() {
  return (
+  <>
   <BrowserRouter> 
     <ToastProvider>
     <Routes>
@@ -27,10 +32,25 @@ function App() {
     <Route path="/register" element={<Register />} />
     <Route path="/Member/*" element={<MemberPage />} />
     <Route path="/Ticket" element={<SelectTicket />} />
-    
+    <Route path="/checkout/:reservationId" element={<CheckoutPage />} />
+    <Route path="/success" element={<SuccessPage />} />
     </Routes>
+    
     </ToastProvider>
   </BrowserRouter>
+  <ToastContainer 
+        position="top-center" 
+        autoClose={3000} 
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    </>
+  
  );
 }
 

@@ -4,7 +4,6 @@ import { useNavigate, Link, useLocation } from "react-router-dom"
 import GoogleLoginButton from "./GoogleLogin"
 import { useDarkMode } from "../hooks/useDarkMode"
 
-
 function Login() {
     const navigate = useNavigate()
     const location = useLocation()
@@ -36,8 +35,19 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        // 登入後要返回的路徑（若從受保護頁帶入）
-        const redirectPath = location.state?.redirect
+        try {
+            const response = await fetch(`http://localhost:8080/member/checkAc?account=${account}`);
+            if (!response.ok) throw new Error("伺服器回應錯誤");
+
+            const isExist = await response.json();
+            if (!isExist) {
+                setMessage("帳號或密碼錯誤")
+                return
+            }
+        } catch (err) {
+            setMessage("連線失敗，請稍後再試")
+            return
+        }
 
         try {
             const res = await fetch("http://localhost:8080/member/login", {
@@ -53,16 +63,20 @@ function Login() {
             })
 
             const data = await res.json()
-            
+
             if (data.success) {
                 setMessage("登入成功！")
                 setTimeout(() => {
-                    if (redirectPath) {
-                        navigate(redirectPath, { replace: true });
+                    if (data.role == "user") {
+                        navigate('/member');
+                    } else if (data.role == "admin") {
+                        navigate('/organizer/dashboard')
+                    } else if (data.role == "developer") {
+                        navigate('/admin/dashboard')
                     } else {
-                        navigate("/member", { replace: true });
+                        console.log("error");
                     }
-                }, 300);
+                }, 500);
             } else {
                 setMessage(data.message || "帳號或密碼錯誤")
             }
@@ -101,7 +115,7 @@ function Login() {
                     {isDark ? "light_mode" : "dark_mode"}
                 </span>
             </button>
-            
+
             <div className="login-container">
                 {/* 左側輪播區 */}
                 <div className="carousel-section">
@@ -110,7 +124,7 @@ function Login() {
                             {carouselItems.map((item, index) => (
                                 <div key={index} className="carousel-item">
                                     <div className="carousel-card">
-                                        <div 
+                                        <div
                                             className="carousel-image"
                                             style={{ backgroundImage: `url(${item.image})` }}
                                         />

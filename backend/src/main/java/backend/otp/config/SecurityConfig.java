@@ -20,7 +20,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import backend.otp.filter.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -48,19 +47,24 @@ public class SecurityConfig {
     @Bean
 public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-        .csrf(csrf -> csrf.disable())
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        // .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        // .csrf(csrf -> csrf.disable())
+        // .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-        // 【修正點 1: 將 exceptionHandling 移到這裡】
-        .exceptionHandling(exception -> exception
-            // 當用戶嘗試訪問需要認證但未提供有效認證時觸發
-            .authenticationEntryPoint((request, response, authException) -> {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 設置為 401
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\": \"認證失敗或 Token 無效\"}");
-            })
-        )
+        // // 【修正點 1: 將 exceptionHandling 移到這裡】
+        // .exceptionHandling(exception -> exception
+        //     // 當用戶嘗試訪問需要認證但未提供有效認證時觸發
+        //     .authenticationEntryPoint((request, response, authException) -> {
+        //         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 設置為 401
+        //         response.setContentType("application/json");
+        //         response.getWriter().write("{\"error\": \"認證失敗或 Token 無效\"}");
+        //     })
+        // )
+        .csrf(csrf -> csrf.disable()) // 關閉 CSRF(因為使用 JWT)
+        .cors(cors -> {
+                })
+        .sessionManagement(session
+                -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 無狀態
 
         // 【修正點 2: 只使用一個 authorizeHttpRequests 區塊】
         .authorizeHttpRequests(auth -> auth
@@ -76,12 +80,17 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                 "/member/register",
                 "/member/checkAc",
                 "/member/verify",
+                "/member/send-verification-code", // 新增
+                "/member/verify-email-code", // 新增
                 "/api/announcements",
                 "/api/announcements/**",
-                "/api/events/**",
+                "/api/events/**", 
+                "/api/images/**",
                 "/oauth2/**",
                 "/oauth2/**",
-                "/loginLog/add"
+                "/loginLog/add",
+                "/swagger-ui/**",
+                "/v3/api-docs/**"
             ).permitAll()
 
             // 其他全部需要 JWT
