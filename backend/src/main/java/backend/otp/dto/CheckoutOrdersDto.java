@@ -1,6 +1,7 @@
 package backend.otp.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import lombok.Data;
@@ -13,4 +14,8 @@ public class CheckoutOrdersDto {
     private int quantity;
     private LocalDateTime purchaseDate;
     private String orderStatus;
+    private LocalDate eventStartDate;
+    private LocalDate eventEndDate;
+    
+    private String eventAddress;
 }

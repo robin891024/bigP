@@ -1,5 +1,8 @@
 package backend.otp.entity;
 
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +24,13 @@ public class Event {
     private String title;
     private Long status_id;
 
+    @Column(name = "event_start")
+    private LocalDate eventStartDate;
+
+    @Column(name = "event_end")
+    private LocalDate eventEndDate;
+
+    private String address;
 
     //---------------------------------------
 

@@ -9,6 +9,7 @@ function MemberInfo() {
     const [city, setCity] = useState("Loading...");
     const [name, setName] = useState("Loading...");
     const [tel, setTel] = useState("Loading...");
+    const [id, setId] = useState("Loading...");
 
     useEffect(() => {
         fetch("http://localhost:8080/member/profile", {
@@ -21,7 +22,8 @@ function MemberInfo() {
                 return res.json();
             })
             .then(data => {
-                console.log(data)
+                console.log(data);
+                setId(data.id);
                 setAccount(data.account);
                 setName(data.name);
                 setCity(data.city);
@@ -41,7 +43,7 @@ function MemberInfo() {
                     <div className="card-header">
                         <h2 className="card-title">會員資訊</h2>
                     </div>
-                    
+
                     <div className="info-list">
                         {/* 帳號 */}
                         <div className="info-item">
@@ -124,16 +126,15 @@ function MemberInfo() {
 
                 {/* 行事曆卡片 */}
                 <div className="calendar-card">
-                    <Calendar />
+                    {typeof id === 'number' ? (
+                        <Calendar userId={id} />
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '2rem' }}>
+                            載入中...
+                        </div>
+                    )}
                 </div>
 
-                {/* Debug 訊息 (可選) */}
-                {/* {process.env.NODE_ENV === 'development' && (
-                    <div className="debug-message">
-                        <p className="debug-title">API 回應：</p>
-                        <pre className="debug-content">{message}</pre>
-                    </div>
-                )} */}
             </div>
         </main>
     );

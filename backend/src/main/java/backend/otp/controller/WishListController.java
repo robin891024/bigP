@@ -70,6 +70,12 @@ public class WishListController {
             dto.setOrganizerName(w.getEvent().getOrganizer().getName());  // 改為從 Member 取得 name
             dto.setOrganizerTel(w.getEvent().getOrganizer().getTel());    // 改為從 Member 取得 tel
 
+            dto.setEventStartDate(w.getEvent().getEventStartDate());
+            dto.setEventEndDate(w.getEvent().getEventEndDate());
+
+            dto.setEventAddress(w.getEvent().getAddress());
+            
+
             // 套用狀態 ID → 中文
             dto.setStatus(toStateName(w.getEvent().getStatus_id()));
 

@@ -59,6 +59,10 @@ public class CheckoutOrdersService {
                     ett.getEvent().getTitle()
             );
 
+            dto.setEventStartDate(ett.getEvent().getEvent_start());
+            dto.setEventEndDate(ett.getEvent().getEvent_end());
+            dto.setEventAddress(ett.getEvent().getAddress());
+
             return dto;
 
         }).collect(Collectors.toList());
