@@ -22,6 +22,7 @@ export default function EventDetail() {
     isFavorited,
     setIsFavorited,
     loading,
+    error, // 接收錯誤狀態
     memberId,
     isLoggedIn
   } = useEventDetail(id);  // 若從登入頁帶著 goTicket=1 返回且已登入，直接導向購票
@@ -35,6 +36,29 @@ export default function EventDetail() {
   if (loading) {
     return <div className="text-center py-12">載入中...</div>;
   }
+
+  // 處理錯誤顯示
+  if (error) {
+    return (
+      <div className="font-sans min-h-screen flex flex-col">
+        <Header showSearchBar={true} />
+        <main className="flex-1 flex flex-col items-center justify-center bg-bg px-6 py-12">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg shadow-sm max-w-md text-center">
+            <h2 className="text-xl font-bold mb-2">無法載入活動</h2>
+            <p>{error}</p>
+            <Button 
+              className="mt-4 bg-gray-600 hover:bg-gray-700 text-white"
+              onClick={() => navigate("/events")}
+            >
+              返回活動列表
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!event) {
     navigate("/events", { replace: true });
     return null;

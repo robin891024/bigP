@@ -45,6 +45,12 @@ function Hero() {
         const fetchImages = async () => {
             try {
                 const response = await fetch(REMOTE_API_ENDPOINT);
+                
+                // 檢查回應狀態，若非 200 OK 則拋出錯誤
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
                 const data = await response.json();
                 
                 // 取得當前時間
@@ -81,6 +87,14 @@ function Hero() {
                 }
             } catch (error) {
                 console.error("無法載入輪播圖片，使用 fallback 圖片。", error);
+                // 發生錯誤時，強制使用 Fallback 圖片
+                // 這裡將 Fallback 圖片轉換為與正常圖片相同的物件結構，id 為 null 代表不可點擊
+                const fallbackData = FALLBACK_IMAGES.map(url => ({ 
+                    id: null, 
+                    imageUrl: url,
+                    title: "Default Image"
+                }));
+                setImages(fallbackData);
             }
         };
         fetchImages();

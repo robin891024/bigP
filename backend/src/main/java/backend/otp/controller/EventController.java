@@ -34,45 +34,52 @@ public class EventController {
 
 	@Operation(summary = "取得所有活動列表", description = "回傳所有活動的基本資訊與封面圖")
 	@GetMapping
-	public List<EventDto> getAllEvents() {
-		// 1. 取得所有活動
-		List<EventJpa> events = eventRepositoryJPA.findAll();
-		
-		// 2. 取得所有圖片資訊 (按建立時間倒序)
-		List<EventTitlePageEntity> images = eventTitlePageRepository.findAllByOrderByCreatedAtDesc();
-		
-		// 3. 建立 EventId -> ImageUrl 的 Map (只保留最新的)
-		Map<Long, String> imageMap = new HashMap<>();
-		for (EventTitlePageEntity img : images) {
-			imageMap.putIfAbsent(img.getEventId(), img.getImageUrl());
+	public ResponseEntity<List<EventDto>> getAllEvents() {
+		try {
+			// 1. 取得所有活動
+			List<EventJpa> events = eventRepositoryJPA.findAll();
+			
+			// 2. 取得所有圖片資訊 (按建立時間倒序)
+			List<EventTitlePageEntity> images = eventTitlePageRepository.findAllByOrderByCreatedAtDesc();
+			
+			// 3. 建立 EventId -> ImageUrl 的 Map (只保留最新的)
+			Map<Long, String> imageMap = new HashMap<>();
+			for (EventTitlePageEntity img : images) {
+				imageMap.putIfAbsent(img.getEventId(), img.getImageUrl());
+			}
+
+			// 4. 轉換為 DTO 並回傳 (按 ID 倒序排列，與原本 JDBC 行為一致)
+			List<EventDto> result = events.stream()
+					.sorted(Comparator.comparing(EventJpa::getId).reversed())
+					.map(eventJpa -> {
+						String imageUrl = imageMap.getOrDefault(eventJpa.getId(), "/api/images/covers/test.jpg");
+						
+						// 處理圖片路徑轉換
+						if (!imageUrl.equals("/api/images/covers/test.jpg")) {
+							String path = imageUrl;
+							if (path.contains("/")) {
+								path = path.substring(path.lastIndexOf("/") + 1);
+							}
+							if (path.contains("\\")) {
+								path = path.substring(path.lastIndexOf("\\") + 1);
+							}
+							imageUrl = "/api/images/covers/" + path;
+						}
+
+						return new EventDto(
+								eventJpa.getId(),
+								imageUrl,
+								eventJpa.getAddress(),
+								eventJpa.getEvent_start() != null ? eventJpa.getEvent_start().toString() : "",
+								eventJpa.getTitle());
+					})
+					.collect(Collectors.toList());
+			
+			return ResponseEntity.ok(result);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.internalServerError().build();
 		}
-
-		// 4. 轉換為 DTO 並回傳 (按 ID 倒序排列，與原本 JDBC 行為一致)
-		return events.stream()
-				.sorted(Comparator.comparing(EventJpa::getId).reversed())
-				.map(eventJpa -> {
-					String imageUrl = imageMap.getOrDefault(eventJpa.getId(), "/api/images/covers/test.jpg");
-					
-					// 處理圖片路徑轉換
-					if (!imageUrl.equals("/api/images/covers/test.jpg")) {
-						String path = imageUrl;
-						if (path.contains("/")) {
-							path = path.substring(path.lastIndexOf("/") + 1);
-						}
-						if (path.contains("\\")) {
-							path = path.substring(path.lastIndexOf("\\") + 1);
-						}
-						imageUrl = "/api/images/covers/" + path;
-					}
-
-					return new EventDto(
-							eventJpa.getId(),
-							imageUrl,
-							eventJpa.getAddress(),
-							eventJpa.getEvent_start() != null ? eventJpa.getEvent_start().toString() : "",
-							eventJpa.getTitle());
-				})
-				.collect(Collectors.toList());
 	}
 
 	// 取得單一活動
@@ -80,30 +87,35 @@ public class EventController {
 	@GetMapping("/detail/{id}")
 	public ResponseEntity<EventDto> getEventById(
 			@Parameter(description = "活動 ID", required = true) @PathVariable Long id) {
-		return eventRepositoryJPA.findById(id)
-				.map(eventJpa -> {
-					String imageUrl = eventTitlePageRepository.findFirstByEventIdOrderByCreatedAtDesc(id)
-							.map(img -> {
-								String path = img.getImageUrl();
-								if (path.contains("/")) {
-									path = path.substring(path.lastIndexOf("/") + 1);
-								}
-								if (path.contains("\\")) {
-									path = path.substring(path.lastIndexOf("\\") + 1);
-								}
-								return "/api/images/covers/" + path;
-							})
-							.orElse("/api/images/covers/test.jpg");
+		try {
+			return eventRepositoryJPA.findById(id)
+					.map(eventJpa -> {
+						String imageUrl = eventTitlePageRepository.findFirstByEventIdOrderByCreatedAtDesc(id)
+								.map(img -> {
+									String path = img.getImageUrl();
+									if (path.contains("/")) {
+										path = path.substring(path.lastIndexOf("/") + 1);
+									}
+									if (path.contains("\\")) {
+										path = path.substring(path.lastIndexOf("\\") + 1);
+									}
+									return "/api/images/covers/" + path;
+								})
+								.orElse("/api/images/covers/test.jpg");
 
-					return new EventDto(
-							eventJpa.getId(),
-							imageUrl,
-							eventJpa.getAddress(),
-							eventJpa.getEvent_start() != null ? eventJpa.getEvent_start().toString() : "",
-							eventJpa.getTitle());
-				})
-				.map(ResponseEntity::ok)
-				.orElse(ResponseEntity.notFound().build());
+						return new EventDto(
+								eventJpa.getId(),
+								imageUrl,
+								eventJpa.getAddress(),
+								eventJpa.getEvent_start() != null ? eventJpa.getEvent_start().toString() : "",
+								eventJpa.getTitle());
+					})
+					.map(ResponseEntity::ok)
+					.orElse(ResponseEntity.notFound().build());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.internalServerError().build();
+		}
 	}
 
 	// 取得單一活動介紹內容
@@ -111,9 +123,14 @@ public class EventController {
 	@GetMapping("/intro/{id}")
 	public ResponseEntity<String> getEventIntro(
 			@Parameter(description = "活動 ID", required = true) @PathVariable Long id) {
-		return eventDetailRepository.findByEventId(id)
-				.map(detail -> ResponseEntity.ok(detail.getContent()))
-				.orElse(ResponseEntity.notFound().build());
+		try {
+			return eventDetailRepository.findByEventId(id)
+					.map(detail -> ResponseEntity.ok(detail.getContent()))
+					.orElse(ResponseEntity.notFound().build());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.internalServerError().build();
+		}
 	}
 
 	// 取得活動總瀏覽/分享數

@@ -12,6 +12,8 @@ export default function Events() {
     // 分頁狀態與活動資料
     const [tab, setTab] = useState("all");
     const [events, setEvents] = useState([]);
+    const [error, setError] = useState(null); // 新增錯誤狀態
+    const [loading, setLoading] = useState(true); // 新增載入狀態
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -21,8 +23,15 @@ export default function Events() {
 
     // 取得活動資料並格式化日期
     useEffect(() => {
+        setLoading(true);
+        setError(null);
         fetch("/api/events")
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(data => {
                 const fixed = Array.isArray(data)
                     ? data.map(event => ({
@@ -32,7 +41,13 @@ export default function Events() {
                     : [];
                 setEvents(fixed);
             })
-            .catch((error) => console.error("取得活動資料失敗", error));
+            .catch((error) => {
+                console.error("取得活動資料失敗", error);
+                setError("無法載入活動資料，請稍後再試。");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
 
     // 依分頁與關鍵字過濾活動
@@ -68,11 +83,27 @@ export default function Events() {
                 {/* 分頁按鈕 */}
                 <EventTabs tab={tab} onTabChange={setTab} />
 
+                {/* 錯誤提示與載入狀態 */}
+                {loading && (
+                    <div className="flex justify-center items-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                    </div>
+                )}
+
+                {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mb-6 text-center" role="alert">
+                        <strong className="font-bold">錯誤！</strong>
+                        <span className="block sm:inline"> {error}</span>
+                    </div>
+                )}
+
                 {/* 活動卡片區塊 */}
-                <EventGrid
-                  events={filteredEvents}
-                  onEventClick={event => navigate(`/events/detail/${event.id}`)}
-                />
+                {!loading && !error && (
+                    <EventGrid
+                        events={filteredEvents}
+                        onEventClick={event => navigate(`/events/detail/${event.id}`)}
+                    />
+                )}
             </main>
             <Footer />
         </div>
