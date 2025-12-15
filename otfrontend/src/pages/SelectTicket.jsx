@@ -9,7 +9,8 @@ import '../Css/SelectTicket.css';
 const BASE_API_URL = 'http://localhost:8080';
 //圖片先寫死
 
-const DEFAULT_IMAGE_URL = "/images/test.jpg";
+// const DEFAULT_IMAGE_URL = "/images/test.jpg";
+const DEFAULT_FALLBACK_SRC = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3C/svg%3E';
 
 export default function SelectTicket() {
   const params = new URLSearchParams(window.location.search);
@@ -27,14 +28,40 @@ export default function SelectTicket() {
 
 
   //載入活動資料
+  // useEffect(() => {
+  //   if (!eventId) return;
+  //   fetch(`${BASE_API_URL}/api/events/${eventId}`)
+  //     .then((r) => {
+  //       if (!r.ok) throw new Error("無法取得活動資料");
+  //       return r.json();
+  //     })
+  //     .then((data) => setEvent(data))
+  //     .catch((err) => {
+  //       console.error(err);
+  //       setMessage("讀取活動資料發生錯誤：" + err.message);
+  //     });
+  // }, [eventId]);
+
+
+//載入活動資料+圖片測試
+
   useEffect(() => {
     if (!eventId) return;
-    fetch(`${BASE_API_URL}/api/events/${eventId}`)
+    fetch(`${BASE_API_URL}/api/events/detail/${eventId}`)
       .then((r) => {
         if (!r.ok) throw new Error("無法取得活動資料");
         return r.json();
       })
-      .then((data) => setEvent(data))
+      .then((data) => {
+        // 支援後端回傳欄位 image 或 imageUrl
+        const rawImage = data.image ?? data.imageUrl ?? null;
+        const transformedEvent = {
+          ...data,
+          // 優先使用後端回傳的 image (或 imageUrl)，否則使用預設圖路徑
+          image: rawImage, //|| DEFAULT_IMAGE_URL,
+        };
+        setEvent(transformedEvent);
+      })
       .catch((err) => {
         console.error(err);
         setMessage("讀取活動資料發生錯誤：" + err.message);
@@ -405,8 +432,16 @@ export default function SelectTicket() {
       <div className="event-info-wrapper">
         <div className="event-info">
           <div className="event-left">
-            {/* 這是讀自己的圖片，非資料庫 */}
-            <img className="event-image" alt="event" src={`${BASE_API_URL}${DEFAULT_IMAGE_URL}`} />
+            {/* 顯示後端回傳的圖片（若為相對路徑則加上 BASE_API_URL） */}
+            <img
+              className="event-image"
+              alt="event"
+              src={
+                event?.image 
+                  ? (event.image.startsWith("http") ? event.image : `${BASE_API_URL}${event.image}`)
+                  : DEFAULT_FALLBACK_SRC
+              }
+            />
           </div>
 
           <div className="event-center">
@@ -457,6 +492,7 @@ export default function SelectTicket() {
                             )}
                           </td>{/*t.customprice*/}
                           <td>
+                          {t.customlimit > 0 ? (
                             <select
                               className="ticketselct"
                               value={t.selectedQty}
@@ -479,6 +515,11 @@ export default function SelectTicket() {
                                 return options;
                               })()}
                             </select>
+                            ) : (
+                           <span className="sold-out-text" style={{ color: 'red', fontWeight: 'bold' }}>
+                             已售罄
+                           </span>
+                           )}
                           </td>
                           <td>{t.description}</td>
                         </tr>
