@@ -6,6 +6,7 @@ export function useEventDetail(eventId) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [event, setEvent] = useState(null); // 改為單一 event state
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // 新增錯誤狀態
   const [memberId, setMemberId] = useState(null);
 
   // 獲取會員 ID
@@ -26,11 +27,16 @@ export function useEventDetail(eventId) {
     
     window.scrollTo(0, 0);
     setLoading(true);
+    setError(null);
     
     // 改為只撈取單一活動
     fetch(`/api/events/detail/${eventId}`)
       .then(res => {
-        if (!res.ok) throw new Error('Event not found');
+        if (!res.ok) {
+            if (res.status === 404) throw new Error('找不到此活動');
+            if (res.status === 500) throw new Error('伺服器發生錯誤，請稍後再試');
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
         return res.json();
       })
       .then(data => {
@@ -41,6 +47,7 @@ export function useEventDetail(eventId) {
       .catch(err => {
         console.error('獲取活動失敗:', err);
         setEvent(null);
+        setError(err.message);
       })
       .finally(() => setLoading(false));
   }, [eventId]);
@@ -75,6 +82,7 @@ export function useEventDetail(eventId) {
     isFavorited,
     setIsFavorited,
     loading,
+    error, // 回傳錯誤狀態
     memberId,
     isLoggedIn
   };
