@@ -25,26 +25,26 @@ function Hero() {
     const [query, setQuery] = useState("");
     const navigate = useNavigate();
     const [images, setImages] = useState([]);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0); 
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     // [新增狀態] 追蹤使用者是否與輪播互動 (滑鼠移入或點擊)
-    const [isInteracting, setIsInteracting] = useState(false); 
+    const [isInteracting, setIsInteracting] = useState(false);
 
     // 轉換 activeImages 為物件陣列格式 { id, imageUrl }
-    const activeImages = images.length > 0 
-        ? images 
+    const activeImages = images.length > 0
+        ? images
         : FALLBACK_IMAGES.map(url => ({ id: null, imageUrl: url }));
-        
+
     const imagesCount = activeImages.length;
-    
+
     // 只有當至少有兩張圖片時，才需要複製實現無限循環
     const shouldClone = imagesCount > 1;
 
     // 修正 slides 列表的建立邏輯
-    const slides = shouldClone 
-        ? [activeImages[imagesCount - 1], ...activeImages, activeImages[0]] 
-        : activeImages; 
-        
-    const slidesCount = slides.length; 
+    const slides = shouldClone
+        ? [activeImages[imagesCount - 1], ...activeImages, activeImages[0]]
+        : activeImages;
+
+    const slidesCount = slides.length;
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -61,30 +61,27 @@ function Hero() {
         const fetchImages = async () => {
             try {
                 const response = await fetch(REMOTE_API_ENDPOINT);
-                
+
                 if (!response.ok) {
                     throw new Error(`API Error: ${response.status}`);
                 }
 
                 const data = await response.json();
-                
-                const now = new Date();
+
                 const sortedEvents = data
-                    .map(event => ({ ...event, diff: Math.abs(new Date(event.eventStart) - now) }))
-                    .sort((a, b) => a.diff - b.diff)
+                    .sort((a, b) => b.id - a.id)
                     .slice(0, 7);
 
+                console.log('[Hero] 排序後 sortedEvents:', sortedEvents);
                 const mappedImages = sortedEvents.map(event => {
-                    const rawUrl = event.imageUrl || '/api/images/covers/test.jpg';
+                    const rawUrl = event.image || '/api/images/covers/test.jpg';
                     return {
                         id: event.id,
-                        imageUrl: rawUrl.startsWith('http') 
-                            ? rawUrl 
-                            : `${REMOTE_API_BASE_URL}${rawUrl}`,
+                        imageUrl: rawUrl,
                         title: event.title
                     };
                 });
-
+                console.log('[Hero] mappedßImages:', mappedImages);
                 if (mappedImages.length > 0) {
                     setImages(mappedImages);
                 }
@@ -105,13 +102,13 @@ function Hero() {
                 slider.style.transition = 'none';
             }
 
-            setCurrentImageIndex(1); 
+            setCurrentImageIndex(1);
 
             setTimeout(() => {
                 if (slider) {
                     slider.style.transition = `transform ${SLIDE_DURATION}ms ease-in-out`;
                 }
-            }, 50); 
+            }, 50);
         }
     }, [imagesCount, currentImageIndex]);
 
@@ -126,10 +123,10 @@ function Hero() {
         let newIndex = index;
 
         if (index === slidesCount - 1) {
-            newIndex = 1; 
-        } 
+            newIndex = 1;
+        }
         else if (index === 0) {
-            newIndex = slidesCount - 2; 
+            newIndex = slidesCount - 2;
         }
 
         if (newIndex !== index) {
@@ -138,32 +135,32 @@ function Hero() {
                 if (slider) {
                     slider.style.transition = 'none';
                 }
-                
+
                 setCurrentImageIndex(newIndex);
-                
+
                 setTimeout(() => {
                     if (slider) {
                         slider.style.transition = `transform ${SLIDE_DURATION}ms ease-in-out`;
                     }
-                }, 50); 
-            }, SLIDE_DURATION); 
+                }, 50);
+            }, SLIDE_DURATION);
         }
     }, [slidesCount]);
 
     const goToPrev = () => {
         // [新增] 在點擊時設定為互動中，防止自動輪播立即覆蓋
-        setIsInteracting(true); 
+        setIsInteracting(true);
         goToSlide(currentImageIndex - 1);
         // [新增] 點擊後短暫延遲後恢復自動輪播（模擬使用者完成操作）
-        setTimeout(() => setIsInteracting(false), SLIDE_INTERVAL / 4); 
+        setTimeout(() => setIsInteracting(false), SLIDE_INTERVAL / 4);
     };
-    
+
     const goToNext = () => {
         // [新增] 在點擊時設定為互動中
         setIsInteracting(true);
         goToSlide(currentImageIndex + 1);
         // [新增] 點擊後短暫延遲後恢復自動輪播
-        setTimeout(() => setIsInteracting(false), SLIDE_INTERVAL / 4); 
+        setTimeout(() => setIsInteracting(false), SLIDE_INTERVAL / 4);
     };
 
     // 核心自動輪播邏輯
@@ -176,16 +173,16 @@ function Hero() {
                     const nextIndex = (prevIndex + 1);
                     // 為了確保瞬間跳轉邏輯在下一個 cycle 被觸發，這裡仍然需要調用 goToSlide 
                     // 但我們主要依賴 setCurrentImageIndex 來驅動 state
-                    goToSlide(nextIndex); 
-                    return nextIndex; 
+                    goToSlide(nextIndex);
+                    return nextIndex;
                 });
             }, SLIDE_INTERVAL);
             return () => clearInterval(timer);
         }
         // 如果 isInteracting 變為 true，定時器會被清除；
         // 如果 isInteracting 變為 false，定時器會被重新建立。
-        return () => {}; // 清除舊定時器
-    }, [shouldClone, goToSlide, isInteracting]); 
+        return () => { }; // 清除舊定時器
+    }, [shouldClone, goToSlide, isInteracting]);
 
     // 箭頭按鈕樣式 (不變)
     const arrowButtonClass = `
@@ -201,23 +198,23 @@ function Hero() {
     const handleMouseLeave = () => setIsInteracting(false);
 
     return (
-        <section 
+        <section
             className="relative w-full flex flex-col justify-center items-center overflow-hidden bg-black"
             onMouseEnter={handleMouseEnter} // 滑鼠移入時暫停
             onMouseLeave={handleMouseLeave} // 滑鼠移出時恢復
         >
-            
+
             {/* 【主容器】確保圖片不溢出：加上 overflow-hidden */}
             <div className="relative w-full overflow-hidden" style={{ paddingBottom: '43.53%' }}>
-                
-                <div 
-                id="slider-track" 
-                className="absolute inset-0 w-full h-full flex"
-                style={{
-                    width: `${slidesCount * 100}%`, 
-                    transition: shouldClone ? `transform ${SLIDE_DURATION}ms ease-in-out` : 'none', 
-                    transform: `translateX(-${currentImageIndex * (100 / slidesCount)}%)`, 
-                }}
+
+                <div
+                    id="slider-track"
+                    className="absolute inset-0 w-full h-full flex"
+                    style={{
+                        width: `${slidesCount * 100}%`,
+                        transition: shouldClone ? `transform ${SLIDE_DURATION}ms ease-in-out` : 'none',
+                        transform: `translateX(-${currentImageIndex * (100 / slidesCount)}%)`,
+                    }}
                 >
                     {slides.map((imgObj, index) => (
                         <div
@@ -228,25 +225,28 @@ function Hero() {
                                     : (index === slidesCount - 1)
                                         ? slides[1].id 
                                         : imgObj.id; 
-                                
                                 if (targetId) navigate(`/events/detail/${targetId}`);
                             }}
-                            className="w-full h-full flex-shrink-0"
+                            className="w-full h-full flex-shrink-0 flex items-center justify-center aspect-[85/37]"
                             style={{
-                                width: `${100 / slidesCount}%`, 
+                                width: `${100 / slidesCount}%`,
                                 cursor: imgObj.id ? 'pointer' : 'default',
-
-                                backgroundImage: `url(${imgObj.imageUrl})`,
-                                backgroundSize: 'contain',
-                                backgroundPosition: 'center',
-                                backgroundRepeat: 'no-repeat',
+                                background: '#000',
                             }}
-                        />
+                        >
+                            <img
+                                src={imgObj.imageUrl.replace(/ /g, '%20')}
+                                alt={imgObj.title || ''}
+                                className="w-full h-full object-cover"
+                                style={{ display: 'block', margin: '0 auto' }}
+                                draggable={false}
+                            />
+                        </div>
                     ))}
                 </div>
 
                 {/* 左右箭頭 */}
-                {shouldClone && ( 
+                {shouldClone && (
                     <>
                         <div className={`${arrowButtonClass} left-2 md:left-4`} onClick={goToPrev}>
                             <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
@@ -291,7 +291,7 @@ function Hero() {
             </div>
         </section>
     );
-      
+
 }
 
 export default Hero;
