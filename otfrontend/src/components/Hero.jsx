@@ -72,8 +72,7 @@ function Hero() {
                     .sort((a, b) => b.id - a.id)
                     .slice(0, 7);
 
-                console.log('[Hero] 排序後 sortedEvents:', sortedEvents);
-                const mappedImages = sortedEvents.map(event => {
+                    const mappedImages = sortedEvents.map(event => {
                     const rawUrl = event.image || '/api/images/covers/test.jpg';
                     return {
                         id: event.id,
@@ -81,7 +80,7 @@ function Hero() {
                         title: event.title
                     };
                 });
-                console.log('[Hero] mappedßImages:', mappedImages);
+
                 if (mappedImages.length > 0) {
                     setImages(mappedImages);
                 }
