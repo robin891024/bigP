@@ -138,12 +138,15 @@ public class EventController {
 
 	// 取得單一活動介紹內容
 	@Operation(summary = "取得單一活動介紹內容", description = "根據活動 ID 回傳活動介紹內容 (HTML/文字)")
-	@GetMapping("/intro/{id}")
+	@GetMapping(value = "/intro/{id}", produces = "text/html;charset=UTF-8")
 	public ResponseEntity<String> getEventIntro(
 			@Parameter(description = "活動 ID", required = true) @PathVariable Long id) {
 		try {
 			return eventDetailRepository.findByEventId(id)
-					.map(detail -> ResponseEntity.ok(detail.getContent()))
+					.map(detail -> {
+						String content = detail.getContent();
+						return ResponseEntity.ok(content != null ? content : "");
+					})
 					.orElse(ResponseEntity.notFound().build());
 		} catch (Exception e) {
 			e.printStackTrace();
