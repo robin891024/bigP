@@ -23,10 +23,10 @@ public interface EventTicketTypeRep extends JpaRepository<EventTicketType, Long>
 
     // 庫存操作
     //減少庫存
-    // @Modifying
-    // @Transactional
-    // @Query("UPDATE EventTicketType ett SET ett.customlimit = ett.customlimit - :quantity WHERE ett.id = :id AND ett.customlimit >= :quantity")
-    // int decreaseStock(Long id, int quantity);//這是一個樂觀鎖的變體，只有當`customlimit >= :quantity`時才會執行更新
+    @Modifying
+    @Transactional
+    @Query("UPDATE EventTicketType ett SET ett.customlimit = ett.customlimit - :quantity WHERE ett.id = :id AND ett.customlimit >= :quantity")
+    int decreaseStock(Long id, int quantity);//這是一個樂觀鎖的變體，只有當`customlimit >= :quantity`時才會執行更新
     // 僅針對限量票進行庫存回滾，不限量不回滾?
     @Modifying
     @Transactional

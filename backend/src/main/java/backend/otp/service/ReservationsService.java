@@ -3,9 +3,11 @@ package backend.otp.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,12 +18,14 @@ import backend.otp.dto.ReservationsCreateRequest;
 import backend.otp.entity.EventJpa;
 import backend.otp.entity.EventTicketType;
 import backend.otp.entity.Member;
+import backend.otp.entity.Orders;
 import backend.otp.entity.ReservationItems;
 import backend.otp.entity.Reservations;
 import backend.otp.entity.TicketDiscountConfig;
 import backend.otp.repository.EventRepositoryJPA;
 import backend.otp.repository.EventTicketTypeRep;
 import backend.otp.repository.MemberRepository;
+import backend.otp.repository.OrdersRepository;
 import backend.otp.repository.ReservationsRepository;
 
 @Service
@@ -34,7 +38,8 @@ public class ReservationsService {
     private EventRepositoryJPA eventRepositoryJPA;
     @Autowired
     private MemberRepository memberRepository;
-
+    @Autowired
+    private OrdersRepository ordersRepository;
 
     //新增早鳥票計算方法，讓預定單和訂單可以吃到折扣後的價格
     private BigDecimal calculateDiscountedPrice(EventTicketType ticketType) {
@@ -67,7 +72,7 @@ public class ReservationsService {
         return finalPrice.setScale(0, RoundingMode.HALF_UP);
     }
 
-    // 建立Reservations
+    // 建立Reservations(檢查庫存+鎖庫存)
     @Transactional
     public Reservations createReservation(ReservationsCreateRequest request) {
         // Reservations reservations = new Reservations();
@@ -84,58 +89,125 @@ public class ReservationsService {
 
         // 設定時間和狀態
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expiresAt = now.plusMinutes(20);// 設定兩分鐘過期
+        LocalDateTime expiresAt = now.plusMinutes(3);// 正式設定20分鐘過期，測試設定1分鐘
 
         // 整合Reservations的Entity並設定屬性
 
         Reservations reservation = new Reservations();
         reservation.setUser(user);
         reservation.setEvent(event);
-        // reservation.setEventTicketType(ticketType);
-        // reservation.setQuantity(quantity);
-        // reservation.setTotalTicketPrice(singleTicketTypeTotalPrice);
-        // reservation.setTotalAmount(totalAmount);
-        // reservation.setStatus("PENDING");
         reservation.setCreatedAt(now);
         reservation.setExpiresAt(expiresAt);
 
-        // 處理所有預定單細項
-        for (ReservationItemsCreateRequest reservationItemsCreateRequest : request.getItems()) {
+        List<ReservationItemsCreateRequest> items =
+        request.getItems().stream()
+            .sorted(Comparator.comparing(ReservationItemsCreateRequest::getEventTicketTypeId))
+            .toList();
 
-            EventTicketType ticketType = eventTicketTypeRep
-                    .findById(reservationItemsCreateRequest.getEventTicketTypeId())
-                    .orElseThrow(
-                            () -> new RuntimeException("票種不存在" + reservationItemsCreateRequest.getEventTicketTypeId()));
+        for (var reqItem : items) {
+        EventTicketType ticketType =
+            eventTicketTypeRep.findByIdForUpdate(reqItem.getEventTicketTypeId());
 
-            // 計算單一票種價格
-            BigDecimal itemUnitPrice = calculateDiscountedPrice(ticketType);
-            int itemQuantity = reservationItemsCreateRequest.getQuantity();
-            BigDecimal itemSubtotal = itemUnitPrice.multiply(new BigDecimal(itemQuantity));
+        if (ticketType.getIslimited()) {
+            if (ticketType.getCustomlimit() < reqItem.getQuantity()) {
+                throw new RuntimeException(ticketType.getTicketType() + " 庫存不足");
+                    }
+                }
+            }
 
-            // 所有票種總和
-            calculatedTotalAmount = calculatedTotalAmount.add(itemSubtotal);
+        for (var reqItem : items) {
+        EventTicketType ticketType =
+            eventTicketTypeRep.findByIdForUpdate(reqItem.getEventTicketTypeId());
 
-            // 建立ReservationItem 實體
-            ReservationItems item = new ReservationItems(); // *** 需要確保 ReservationItem Entity 已建立並導入 ***
-            item.setEventTicketType(ticketType);
-            item.setQuantity(itemQuantity);
-            item.setUnitPrice(itemUnitPrice); // 儲存當前單價
-            // item.setSubtotalPrice(itemSubtotal);
-            reservation.addItem(item);
+        if (ticketType.getIslimited()) {
+            ticketType.setCustomlimit(
+                ticketType.getCustomlimit() - reqItem.getQuantity()
+            );
+        }
 
+        BigDecimal unitPrice = calculateDiscountedPrice(ticketType);
+        calculatedTotalAmount = calculatedTotalAmount.add(unitPrice.multiply(BigDecimal.valueOf(reqItem.getQuantity())));
+
+        ReservationItems item = new ReservationItems();
+        item.setEventTicketType(ticketType);
+        item.setQuantity(reqItem.getQuantity());
+        item.setUnitPrice(unitPrice);
+
+        reservation.addItem(item);
         }
         reservation.setTotalAmount(calculatedTotalAmount);
-        Reservations savedReservation = repositoryrepo.save(reservation);
-        return savedReservation;
+        return repositoryrepo.save(reservation);
     }
 
+
+
+        // 處理所有預定單細項
+    //     for (ReservationItemsCreateRequest reservationItemsCreateRequest : request.getItems()) {
+
+    //         Long ticketTypeId = reservationItemsCreateRequest.getEventTicketTypeId();
+    //         int itemQuantity = reservationItemsCreateRequest.getQuantity();
+
+    //         EventTicketType ticketType = eventTicketTypeRep
+    //                 .findById(ticketTypeId)
+    //                 .orElseThrow(
+    //                         () -> new RuntimeException("票種不存在" + reservationItemsCreateRequest.getEventTicketTypeId()));
+
+    //         // 計算單一票種價格
+    //         BigDecimal itemUnitPrice = calculateDiscountedPrice(ticketType);
+    //         // int itemQuantity = reservationItemsCreateRequest.getQuantity();
+    //         BigDecimal itemSubtotal = itemUnitPrice.multiply(new BigDecimal(itemQuantity));
+
+    //         // 所有票種總和
+    //         calculatedTotalAmount = calculatedTotalAmount.add(itemSubtotal);
+
+    //         // 建立ReservationItem 實體
+    //         ReservationItems item = new ReservationItems(); // *** 需要確保 ReservationItem Entity 已建立並導入 ***
+    //         item.setEventTicketType(ticketType);
+    //         item.setQuantity(itemQuantity);
+    //         item.setUnitPrice(itemUnitPrice); // 儲存當前單價
+    //         // item.setSubtotalPrice(itemSubtotal);
+    //         reservation.addItem(item);
+
+    //     }
+    //     reservation.setTotalAmount(calculatedTotalAmount);
+    //     Reservations savedReservation = repositoryrepo.save(reservation);
+    //     return savedReservation;
+    // }
+
+
+    //處理20分鐘回滾過期預定單(回滾還沒完成)
+    @Scheduled(fixedRate = 60000) // 每分鐘檢查一次
+    @Transactional
+    public void rollbackExpiredReservations() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Orders> expiredOrders = ordersRepository.findByStatusAndReservation_ExpiresAtBefore("PENDING", now);
+        
+        for (Orders orders : expiredOrders) {
+             Reservations reservation = orders.getReservation();
+
+            // 回滾票種庫存
+            for (ReservationItems item : reservation.getItems()) {
+                EventTicketType ticketType = item.getEventTicketType();
+                if (ticketType.getIslimited()) {
+                    ticketType.setCustomlimit(ticketType.getCustomlimit() + item.getQuantity());
+                    eventTicketTypeRep.save(ticketType);
+                }
+            }
+            // 更新狀態為 CANCELLED
+            orders.setStatus("CANCELLED");
+            ordersRepository.save(orders);
+        }
+    }
+
+
+
+    // 將Reservations Entity轉成DTO
     private ReservationResponse mapToReservationResponse(Reservations entity) {
         ReservationResponse response = new ReservationResponse();
 
         response.setId(entity.getId());
         response.setUserId(entity.getUser().getId());
         response.setEventId(entity.getEvent().getId());
-        // response.setStatus(entity.getStatus());
         response.setExpiresAt(entity.getExpiresAt());
         response.setCreatedAt(entity.getCreatedAt());
         response.setTotalAmount(entity.getTotalAmount());
@@ -148,6 +220,7 @@ public class ReservationsService {
         return response;
     }
 
+    // 將ReservationItems Entity轉成DTO
     private ReservationItemsResponse mapToReservationItemsResponse(ReservationItems itemEntity) {
         ReservationItemsResponse response = new ReservationItemsResponse();
 
@@ -171,5 +244,5 @@ public class ReservationsService {
 
 }
 
-// 無法一次紀錄兩種不同的票種
+
 // 狀態改變PENDING

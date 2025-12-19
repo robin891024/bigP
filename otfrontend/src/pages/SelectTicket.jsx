@@ -4,6 +4,8 @@ import Footer from "../components/Footer";
 import Breadcrumb from "../components/Breadcrumb";
 import { useNavigate } from "react-router-dom";
 import '../Css/SelectTicket.css';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // **** 設定Spring Boot基礎URL ****
 const BASE_API_URL = 'http://localhost:8080';
@@ -43,11 +45,11 @@ export default function SelectTicket() {
   // }, [eventId]);
 
 
-//載入活動資料+圖片測試
+//載入活動資料+圖片
 
   useEffect(() => {
     if (!eventId) return;
-    fetch(`${BASE_API_URL}/api/events/detail/${eventId}`)
+    fetch(`${BASE_API_URL}/api/events/${eventId}`)
       .then((r) => {
         if (!r.ok) throw new Error("無法取得活動資料");
         return r.json();
@@ -55,10 +57,12 @@ export default function SelectTicket() {
       .then((data) => {
         // 支援後端回傳欄位 image 或 imageUrl
         const rawImage = data.image ?? data.imageUrl ?? null;
+        // console.log("後端原始資料:", data);
         const transformedEvent = {
           ...data,
-          // 優先使用後端回傳的 image (或 imageUrl)，否則使用預設圖路徑
-          image: rawImage, //|| DEFAULT_IMAGE_URL,
+          image: rawImage,
+          event_start: data.event_start ?? data.eventStart,
+          event_end: data.event_end ?? data.eventEnd,
         };
         setEvent(transformedEvent);
       })
@@ -213,198 +217,211 @@ export default function SelectTicket() {
 
 
   //處理庫存回滾rollback
-  // const rollbackStock = async (itemsToRollback) => {
-  //   setMessage("已超過2分鐘，訂單未付款，票將退回庫存");
-  //   console.log("開始回滾", itemsToRollback);
+  const rollbackStock = async (itemsToRollback) => {
+    setMessage("已超過20分鐘，訂單未付款，票將退回庫存");
+    console.log("開始回滾", itemsToRollback);
 
-  //   const increasePromises = itemsToRollback.map(async (item) => {
-  //     const url = `${BASE_API_URL}/api/eventtickettype/${item.ticketId}/increaseStock`;
-  //     const response = await fetch(url, {
-  //       method: 'PUT',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ quantity: item.quantity }),
-  //     });
-
-  //     if (!response.ok) {
-  //       console.error(`票種ID ${item.ticketId} 庫存回滾失敗`, await response.text());
-  //     } else {
-  //       console.log(`票種ID ${item.ticketId} 庫存回滾 ${item.quantity} 成功`);
-  //     }
-  //   });
-
-  //   await Promise.all(increasePromises);
-  //   setMessage("庫存已回滾，請重新選擇");
-
-  //重新載入票種資料，更新前端的庫存顯示(如果有)
-  // loadTicketTypes();
-  //清空選中的數量
-  //   setTickets(prev => prev.map(t => ({ ...t, selectedQty: 0 })));
-  // }
-
-
-
-
-  // 處理結帳流程(鎖庫存 + 建立reservation & order)
-  async function handleCheckout(e) {
-    e.preventDefault();
-    if (isCheckingOut) return; //防止重複提交
-
-    setMessage("");
-    setIsCheckingOut(true);
-
-    //1.取得選定的票種
-    const selected = tickets.filter((t) => t.selectedQty > 0);
-    if (selected.length === 0) {
-      alert("請選擇至少一張票。");
-      setIsCheckingOut(false);
-      return;
-    }
-
-    //2.建立結帳項目，使用t.id作為庫存操作的目標 ID
-    const checkoutItems = selected.map((t) => ({
-      eventTicketTypeId: t.id, //庫存操作的主鍵ID
-      quantity: t.selectedQty,
-    }));
-
-    try {
-      console.log("開始結帳流程...");
-      setMessage("請於 20 分鐘內完成付款。");//原本有鎖票前面會加這段文字"已暫時保留票券，"
-
-      //3.針對每一個選定的票種，使用後端API鎖庫存
-      // const decreasePromises = checkoutItems.map(async (item) => {
-      //   const url = `${BASE_API_URL}/api/eventtickettype/${item.ticketId}/decreaseStock`;
-      //   const response = await fetch(url, {
-      //     method: 'PUT',
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify({ quantity: item.quantity }),
-      //   });
-
-      //   if (!response.ok) {
-      //     const errorText = await response.text();
-      //拋出票種名稱的錯誤訊息，方便用戶識別
-      //     throw new Error(`[${item.ticketType}] 庫存不足: ${errorText}`);
-      //   }
-      //   console.log(`票種ID: ${item.ticketId} 庫存扣: ${item.quantity} 成功`);
-      // });
-
-      //4.等待所有庫存鎖完成
-      // await Promise.all(decreasePromises);
-      // console.log("庫存已鎖成功，進入支付流程");
-
-      //5.成功鎖後，設定回滾時間(2分鐘=120000毫秒)
-      // const ROLLBACK_TIME_MS = 120000; //2minutes
-      //清除舊計時器
-      // if (rollbackTimer) clearTimeout(rollbackTimer);
-
-      // 設定新的計時器
-      // const timerId = setTimeout(() => { //3分鐘內仍未結帳，則執行回滾
-      //   rollbackStock(checkoutItems);
-      //   setRollbackTimer(null); //清除計時器狀態
-      // }, ROLLBACK_TIME_MS);
-      // setRollbackTimer(timerId); //保存新的計時器ID
-      // setMessage(`庫存保留: ${totalTickets} 張票券，請於3分鐘內完成付款`);
-
-      // 6.(此處為模擬) 準備傳送給支付系統的資料
-      const createBody = {
-        // userId: 3,//暫時寫死
-        eventId: eventId,
-        items: checkoutItems.map((t) => ({
-          eventTicketTypeId: t.eventTicketTypeId,
-          quantity: t.quantity,
-        })),
-      };
-
-      console.log(tickets.map(t => ({ id: t.id, name: t.ticketType })));
-      console.log("送後端的 createBody：", createBody);
-
-      const res = await fetch(`${BASE_API_URL}/api/reservations/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(createBody),
+    const increasePromises = itemsToRollback.map(async (item) => {
+      const url = `${BASE_API_URL}/api/eventtickettype/${item.ticketId}/increaseStock`;
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ quantity: item.quantity }),
       });
 
-      // 後端建立成功 (201或200 Created都為成功)
-      if (res.status === 201 || res.status === 200) {
-        const respJson = await res.json();//建立成功，取得回應JSON
-        console.log("建立 reservation & order 成功：", respJson);
-
-        // 顯示成功訊息
-        // setMessage("訂單建立成功，準備前往付款...");
-
-        // 取回 orderId（若後端欄位不同請改名）
-        // const orderId = respJson.orderId ?? respJson.id ?? respJson.order_id ?? null;
-        // const reservationId = respJson.reservationId ?? respJson.reservation_id ?? null;
-
-        const orderId = respJson.orderId ?? respJson.id ?? respJson.order_id ?? null;
-        const reservationId = respJson.reservations_id ?? respJson.reservationId ?? respJson.reservation_id ?? null;
-
-        if (reservationId) {
-          // 📌 核心導航邏輯：導向 /checkout/1033 (例如)
-          navigate(`/checkout/${reservationId}`);
-          return; // 成功導航後，阻止 finally 執行
-        } else {
-          setMessage("訂單已建立，但無法取得結帳 ID，請檢查後端回傳格式。");
-        }
+      if (!response.ok) {
+        console.error(`票種ID ${item.ticketId} 庫存回滾失敗`, await response.text());
       } else {
-        // 失敗：解析錯誤訊息並顯示
-        const text = await res.text();
-        console.error("建立訂單失敗：", res.status, text);
-        setMessage("建立訂單失敗：" + (text || res.status));
+        console.log(`票種ID ${item.ticketId} 庫存回滾 ${item.quantity} 成功`);
       }
-    } catch (err) {
-      //處理例外
-      setMessage("結帳發生錯誤，請檢查網路連線或庫存狀況");
-      console.error("結帳失敗:", err);
-      loadTicketTypes();
-    }
-    finally {
-      setIsCheckingOut(false);
-    }
+    });
+
+    await Promise.all(increasePromises);
+    setMessage("庫存已回滾，請重新選擇");
+
+  //重新載入票種資料，更新前端的庫存顯示(如果有)
+  loadTicketTypes();
+  //清空選中的數量
+    setTickets(prev => prev.map(t => ({ ...t, selectedQty: 0 })));
   }
 
-  //導到付款頁(目前未完成)
-  //  if (orderId) {
-  //     //導向：/payment?orderId=xxx
-  //     window.location.href = `/payment?orderId=${orderId}&reservationId=${reservationId ?? ""}`;
+
+  // async function handleCheckout(e) {
+  //   e.preventDefault();
+  //   if (isCheckingOut) return; //防止重複提交
+  //   setIsCheckingOut(true);
+
+  //   //1.取得選定的票種
+  //   const selected = tickets.filter((t) => t.selectedQty > 0);
+  //   if (selected.length === 0) {
+  //     alert("請選擇至少一張票。");
+  //     setIsCheckingOut(false);
   //     return;
-  //     } else {
-  //     // 若沒有 orderId，仍把使用者導到訂單頁或顯示資訊
-  //     setMessage("訂單已建立，請前往訂單管理查詢。");
-  //     }
+  //   }
+
+  //   //2.建立結帳項目，使用t.id作為庫存操作的目標 ID
+  //   const checkoutItems = selected.map((t) => ({
+  //     ticketId: t.id, 
+  //     ticketType: t.ticketType,
+  //     quantity: t.selectedQty,
+  //   }));
+  //   try {
+  //     console.log("開始結帳流程...");
+  //     setMessage("已保留票券，請於 20 分鐘內完成付款。");
+
+  //     //3.針對每一個選定的票種，使用後端API鎖庫存
+  //     const decreasePromises = checkoutItems.map(async (item) => {
+  //       const url = `${BASE_API_URL}/api/eventtickettype/${item.ticketId}/decreaseStock`;
+  //       const response = await fetch(url, {
+  //         method: 'PUT',
+  //         headers: { 'Content-Type': 'application/json'},
+  //         credentials: 'include',
+  //         body: JSON.stringify({ quantity: item.quantity }),
+  //       });
+
+  //       if (!response.ok) {
+  //         const errorText = await response.text();
+  //     //拋出票種名稱的錯誤訊息，方便用戶識別
+  //         throw new Error(`${item.ticketType}已售罄，請重新選擇票種。`);
+  //       }
+  //       console.log(`票種ID: ${item.ticketId} 庫存扣: ${item.quantity} 成功`);
+  //     });
+
+  //     //4.等待所有庫存鎖完成
+  //     await Promise.all(decreasePromises);
+  //     console.log("庫存已鎖成功，進入支付流程");
+
+  //     //5.成功鎖後，設定回滾時間(正式設定20分鐘=1200000毫秒)
+  //     const ROLLBACK_TIME_MS = 60000; //測試目前設定30秒回滾，20minutes
+  //     //清除舊計時器
+  //     if (rollbackTimer) clearTimeout(rollbackTimer);
+
+  //     // 設定新的計時器
+  //     const timerId = setTimeout(() => { //20分鐘內仍未結帳，則執行回滾
+  //       rollbackStock(checkoutItems);
+  //       setRollbackTimer(null); //清除計時器狀態
+  //     }, ROLLBACK_TIME_MS);
+  //     setRollbackTimer(timerId); //保存新的計時器ID
+  //     // setMessage(`庫存保留: ${totalTickets} 張票券，請於20分鐘內完成付款`);
+
+  //     // 6.(此處為模擬) 準備傳送給支付系統的資料
+  //     const createBody = {
+  //       // userId: 3,//暫時寫死
+  //       eventId: eventId,
+  //       items: checkoutItems.map((item) => ({
+  //         eventTicketTypeId: item.ticketId,
+  //         quantity: item.quantity,
+  //       })),
+  //     };
+
+  //     // console.log(tickets.map(t => ({ id: t.id, name: t.ticketType })));
+  //     console.log("送後端的 createBody：", createBody);
+
+  //     const res = await fetch(`${BASE_API_URL}/api/reservations/create`, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json"},
+  //       credentials: "include",
+  //       body: JSON.stringify(createBody),
+  //     });
+
+  //     // 後端建立成功 (201或200 Created都為成功)
+  //     if (res.status === 201 || res.status === 200) {
+  //       const respJson = await res.json();//建立成功，取得回應JSON
+  //       console.log("建立 reservation & order 成功：", respJson);
+
+  //       // 顯示成功訊息
+  //       // setMessage("訂單建立成功，準備前往付款...");
+
+  //       // 取回 orderId（若後端欄位不同請改名）
+  //       // const orderId = respJson.orderId ?? respJson.id ?? respJson.order_id ?? null;
+  //       // const reservationId = respJson.reservationId ?? respJson.reservation_id ?? null;
+
+  //       const orderId = respJson.orderId ?? respJson.id ?? respJson.order_id ?? null;
+  //       const reservationId = respJson.reservations_id ?? respJson.reservationId ?? respJson.reservation_id ?? null;
+
+  //       if (reservationId) {
+  //         // 📌 核心導航邏輯：導向 /checkout/1033 (例如)
+  //         navigate(`/checkout/${reservationId}`);
+  //         return; // 成功導航後，阻止 finally 執行
+  //       } else {
+  //         setMessage("訂單已建立，但無法取得結帳 ID，請檢查後端回傳格式。");
+  //       }
   //     } else {
   //       // 失敗：解析錯誤訊息並顯示
   //       const text = await res.text();
   //       console.error("建立訂單失敗：", res.status, text);
   //       setMessage("建立訂單失敗：" + (text || res.status));
-  //       // 若你有啟動鎖庫存，這裡可選擇去回滾鎖定的庫存
-  //       // rollbackStock(checkoutItems);
   //     }
-  //     } catch (err) {
-  //       // 處理例外（例如鎖庫存失敗、網路錯誤等）
-  //       console.error("結帳錯誤：", err);
-  //       setMessage("結帳發生錯誤：" + (err.message || err));
-  //       // 若你之前有做 decreaseStock，並且失敗或中斷，建議呼叫 rollbackStock
-  //       // rollbackStock(checkoutItems);
-  //     } finally {
-  //       // 無論成功或失敗，都要解除按鈕鎖定（除非 redirect 已經發生）
-  //       setIsCheckingOut(false);
-  //     }
-  // }
-  //     console.log("📝 準備傳送的結帳資料 (JSON):");
-  //     console.log(JSON.stringify(createBody, null, 2));
-  //     console.log(createBody);
-  //     // 實際導向：window.location.href = "/payment.html";
   //   } catch (err) {
-  //     //鎖庫存失敗，顯示錯誤給用戶
-  //     setMessage("此票種庫存不足");
+  //     //處理例外
+  //     setMessage("結帳發生錯誤，請檢查網路連線或庫存狀況");
   //     console.error("結帳失敗:", err);
-  //     loadTicketTypes(); //重新載入票種以顯示最新庫存
+  //     toast.error(`結帳失敗:${err.message}`, {
+  //       position: "top-center",
+  //       autoClose: 3000, // 3秒後自動關閉
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //     });
+  //     loadTicketTypes();
   //   }
   //   finally {
   //     setIsCheckingOut(false);
+  //   }
   // }
-  // }
+    
+  
+  
+  // 處理結帳流程(鎖庫存 + 建立reservation & order)
+  async function handleCheckout(e) {
+    e.preventDefault();
+    if (isCheckingOut) return;
+
+    const selected = tickets.filter((t) => t.selectedQty > 0);
+    if (selected.length === 0) {
+      toast.warn("請選擇至少一張票");
+      return;
+    }
+
+    setIsCheckingOut(true);
+
+    try {
+      const body = {
+        eventId,
+        items: selected.map((t) => ({
+          eventTicketTypeId: t.id,
+          quantity: t.selectedQty,
+        })),
+      };
+
+      const res = await fetch(`${BASE_API_URL}/api/reservations/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "庫存不足");
+      }
+
+      const json = await res.json();
+      const reservationId =
+        json.reservationId ?? json.reservations_id ?? json.id;
+
+      setMessage("票券已保留，請於 20 分鐘內完成付款");
+      navigate(`/checkout/${reservationId}`);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "結帳失敗");
+      loadTicketTypes(); // 重新同步庫存顯示
+    } finally {
+      setIsCheckingOut(false);
+    }
+  }
+  
 
   //組件卸載時清除計時器，防止內存洩露
   // useEffect(() => {
@@ -417,6 +434,7 @@ export default function SelectTicket() {
 
   return (
     <div className="ticketpage">
+    <ToastContainer />
       <Header />
       {/* 麵包屑 */}
       <div className="max-w-7xl mx-auto w-full px-0 py-0">

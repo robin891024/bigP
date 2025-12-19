@@ -57,27 +57,30 @@ public class ReservationController {
     @PostMapping("/create")
     public ResponseEntity<OrdersResponse> createReservationAndOrder(
             @RequestBody @Valid ReservationsCreateRequest request,
+            HttpServletRequest servletRequest,
             Authentication authentication) {
         try {
+                Long userId = request.getUserId();
             // 1) Resolve current user: prefer request.userId, otherwise use Authentication
-            if (request.getUserId() == null) {
-                if (authentication == null || !authentication.isAuthenticated()) {
-                    // 未登入
-                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "未登入，請先登入後再購票");
-                }
-
-                // authentication.getName() 通常是 username/email，依你實作而定
-                String username = authentication.getName();
-                Long userId = memberRepository.findIdByAccount(username);
-
+            if (userId == null) {
+            String jwtToken = getJwtFromCookie(servletRequest);
+            
+            if (jwtToken != null && jwt.validateToken(jwtToken)) {
+                String account = jwt.getUsernameFromToken(jwtToken);
+                userId = memberRepository.findIdByAccount(account);
+            } else if (authentication != null && authentication.isAuthenticated()) {
+                // 如果 Cookie 抓不到但 Security 抓得到（雙重保險）
+                userId = memberRepository.findIdByAccount(authentication.getName());
+            }
+        }
                 if (userId == null) {
                     throw new ResponseStatusException(
                             HttpStatus.UNAUTHORIZED,
-                            "找不到會員 (account=" + username + ")");
+                            "找不到會員 (account=" + authentication.getName() + ")");
                 }
 
                 request.setUserId(userId);
-            }
+            
 
             // 2) 呼叫 service 建立 reservation 並建立 order
             Reservations newReservation = reservationsService.createReservation(request);
@@ -101,6 +104,7 @@ public class ReservationController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, msg, ex);
         }
     }
+    
     // System.out.println("Received reservation request: " + request);
     // Reservations newReservation;
     // Orders newOrder;

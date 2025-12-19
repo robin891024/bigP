@@ -184,13 +184,13 @@ public class OrderService {
 
                 int quantity = item.getQuantity();
 
-                if (ticketType.getIslimited()) {
-                    int remain = ticketType.getCustomlimit() - quantity;
-                    if (remain < 0) {
-                        throw new RuntimeException("庫存不足");
-                    }
-                    ticketType.setCustomlimit(remain);
-                }
+                // if (ticketType.getIslimited()) {
+                //     int remain = ticketType.getCustomlimit() - quantity;
+                //     if (remain < 0) {
+                //         throw new RuntimeException("庫存不足");
+                //     }
+                //     ticketType.setCustomlimit(remain);
+                // }
 
                 CheckoutOrders co = new CheckoutOrders();
                 co.setOrder(orders);

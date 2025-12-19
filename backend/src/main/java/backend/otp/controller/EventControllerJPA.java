@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import backend.otp.entity.EventJpa;
+import backend.otp.repository.EventTitlePageRepository;
 import backend.otp.service.EventService;
 
 
@@ -23,6 +24,9 @@ public class EventControllerJPA {
     @Autowired
     private EventService eventsService;
 
+    @Autowired
+    private EventTitlePageRepository eventTitlePageRepository;
+
     @GetMapping("/all")
     public List<EventJpa> getallEvents(){
         return eventsService.getallEvent();
@@ -32,7 +36,17 @@ public class EventControllerJPA {
     @GetMapping("/{id}")
     public ResponseEntity<?> getEvent(@PathVariable Long id) {
         return eventsService.getEventById(id)
-                .map(event -> {//如果有找到event就做下面的事 
+                .map(event -> {//如果有找到event就做下面的事
+                    String imageUrl = eventTitlePageRepository.findFirstByEventIdOrderByCreatedAtDesc(id)
+                            .map(img -> {
+                                String path = img.getImageUrl();
+                                // 處理路徑，只取檔名
+                                if (path.contains("/")) path = path.substring(path.lastIndexOf("/") + 1);
+                                if (path.contains("\\")) path = path.substring(path.lastIndexOf("\\") + 1);
+                                return "/api/images/covers/" + path; // 回傳前端預期的路徑
+                            })
+                            .orElse("/api/images/covers/test.jpg"); // 沒圖片時的預設圖
+
                     // 回傳 JSON 給前端
                     Map<String, Object> response = new HashMap<>();
                     response.put("id", event.getId());
@@ -41,7 +55,7 @@ public class EventControllerJPA {
                     response.put("event_start", event.getEvent_start());
                     response.put("event_end", event.getEvent_end());
                     response.put("address", event.getAddress());
-
+                    response.put("image", imageUrl);
                     return ResponseEntity.ok(response);// 如果有找到event就回傳200和event
                 })
 

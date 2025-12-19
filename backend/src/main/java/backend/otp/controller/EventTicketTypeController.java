@@ -16,10 +16,6 @@ import backend.otp.dto.EventTicketTypeResponse;
 import backend.otp.dto.StockChange;
 import backend.otp.service.EventTicketTypeService;
 
-// import tw.jay.springtest.DTO.Request.StockChange;
-// import tw.jay.springtest.DTO.Response.EventTicketTypeResponse;
-// import tw.jay.springtest.service.EventTicketTypeService;
-
 @RestController
 @RequestMapping("/api/eventtickettype")
 public class EventTicketTypeController {

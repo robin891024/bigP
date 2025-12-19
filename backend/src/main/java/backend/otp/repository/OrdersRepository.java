@@ -1,5 +1,8 @@
 package backend.otp.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +18,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
             @Param("status") String status);
 
     Orders findByReservationId (Long reservationId);
+    //查詢關於過期的訂單
+    List<Orders> findByStatusAndReservation_ExpiresAtBefore(String status, LocalDateTime time);
 }
