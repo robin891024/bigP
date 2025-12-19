@@ -13,7 +13,7 @@ public class EventDetail {
     @Column(name = "event_id")
     private Long eventId;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
 
     public Long getId() {

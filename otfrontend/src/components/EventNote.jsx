@@ -2,12 +2,12 @@ import React from "react";
 
 export default function EventNote({ eventId }) {
   // TODO: 之後可根據 eventId fetch 注意事項
-  // 目前先用公版內容
+  // 目前先用公版內容ㄌ
   return (
     <div className="pt-4">
       <div className="font-bold mb-2">【購票前請詳閱注意事項】</div>
       <ol className="list-decimal pl-6 space-y-2 text-base">
-        <li className="text-red-600 font-semibold">每人/每帳號限購1張門票(含42 MEMBERSHIP (GLOBAL) 官方會員預購及全面開賣所有階段購票總數)</li>
+        <li className="text-red-600 font-semibold">每人/每帳號限購1張門票</li>
         <li className="text-red-600 font-semibold">每筆訂單票券，系統會自動帶入購票會員的姓名及證件字號，且不得修改。確認購票後，恕不提供修改票券姓名及證件字號。</li>
         <li className="text-red-600 font-semibold">進場需持有效之節目票券，及本人有照片之有效證件正本（兩者姓名&證件號碼一致)，以便現場驗證。</li>
         <li className="text-red-600 font-semibold">現場驗票將核對票券姓名及證件字號與本人身份，若不符主辦單位有權拒絕入場，並拒絕任何退換票要求。</li>
