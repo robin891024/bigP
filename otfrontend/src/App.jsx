@@ -14,6 +14,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import CheckoutPage from './pages/CheckoutPage'; 
 import SuccessPage from './pages/SuccessPage'; 
+import GoogleRegister from './pages/GoogleRegister';
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
     <Route path="/register" element={<Register />} />
     <Route path="/Member/*" element={<MemberPage />} />
     <Route path="/Ticket" element={<SelectTicket />} />
+    <Route path="/googleRegister" element={<GoogleRegister />} />
     <Route path="/checkout/:reservationId" element={<CheckoutPage />} />
     <Route path="/success" element={<SuccessPage />} />
     </Routes>
