@@ -1,8 +1,9 @@
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function GoogleLoginButton() {
     const navigate = useNavigate();
+    const location = useLocation();
 
     // ⚠️ 請替換成你實際的 Google Client ID
     const clientId = "494235280467-1u61vd7vgnslc7bnducg7k49s16v66mr.apps.googleusercontent.com";
@@ -23,7 +24,8 @@ function GoogleLoginButton() {
             const data = await response.json();
 
             if (data.success) {
-                navigate('/member');
+                const redirectPath = location.state?.redirect || '/member';
+                navigate(redirectPath);
             } else if (data.needRegister) {
                 navigate("/googleRegister", {
                     state: {

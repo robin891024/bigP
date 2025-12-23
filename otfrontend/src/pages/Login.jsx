@@ -106,7 +106,8 @@ function Login() {
                 setMessage("登入成功！")
                 setTimeout(() => {
                     if (data.role == "user") {
-                        navigate('/member');
+                        const redirectPath = location.state?.redirect || '/member';
+                        navigate(redirectPath);
                     } else if (data.role == "admin") {
                         window.location.href = "http://localhost:8081/organizer/dashboard";
                     } else if (data.role == "developer") {

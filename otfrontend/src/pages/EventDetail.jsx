@@ -167,7 +167,7 @@ export default function EventDetail() {
               ? "立即購票" 
               : event.statusId === 1 
                 ? "尚未開放" 
-                : "暫停售票"}
+                : "尚未開放"}
           </Button>
         </div>
         {/* 收藏與分享按鈕 */}
