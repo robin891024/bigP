@@ -10,6 +10,7 @@ import Footer from '../components/Footer';
 import Top from '../components/ui/Top';
 import CollectPage from '../components/CollectPage';
 import CheckoutOrder from "../components/CheckoutOrder";
+import Qrcode from "../components/Qrcode";
 
 function MemberPage() {
     // 每 5 分鐘檢查一次 token 是否過期
@@ -44,6 +45,7 @@ function MemberPage() {
                                 <Route path="revise/:field" element={<RevisePage />} />
                                 <Route path="wishList" element={<CollectPage />}/>
                                 <Route path="history" element={<CheckoutOrder />} />
+                                <Route path="qrcode" element={<Qrcode />} />
                             </Routes>
                         </>
                     </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import "../Css/CheckoutOrder.css";
+import { Link } from "react-router-dom";
 
 function CheckoutOrder() {
     const [message, setMessage] = useState([]);
@@ -122,6 +123,9 @@ function CheckoutOrder() {
                                                         {m.orderStatus}
                                                     </span>
                                                 </td> */}
+                                                <td className="table-info table-column-date">
+                                                    <Link className="event-link" to="/member/qrcode">查看活動QR Code</Link>
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -131,20 +135,20 @@ function CheckoutOrder() {
                             {/* 分頁控制 */}
                             {totalPages > 1 && (
                                 <div className="pagination">
-                                    <button 
-                                        className="pagination-button" 
+                                    <button
+                                        className="pagination-button"
                                         onClick={goToPrevious}
                                         disabled={currentPage === 1}
                                     >
                                         上一頁
                                     </button>
-                                    
+
                                     {[...Array(totalPages)].map((_, index) => {
                                         const page = index + 1;
                                         // 只顯示當前頁面附近的頁碼
                                         if (
-                                            page === 1 || 
-                                            page === totalPages || 
+                                            page === 1 ||
+                                            page === totalPages ||
                                             (page >= currentPage - 1 && page <= currentPage + 1)
                                         ) {
                                             return (
@@ -157,16 +161,16 @@ function CheckoutOrder() {
                                                 </button>
                                             );
                                         } else if (
-                                            page === currentPage - 2 || 
+                                            page === currentPage - 2 ||
                                             page === currentPage + 2
                                         ) {
                                             return <span key={page} className="pagination-info">...</span>;
                                         }
                                         return null;
                                     })}
-                                    
-                                    <button 
-                                        className="pagination-button" 
+
+                                    <button
+                                        className="pagination-button"
                                         onClick={goToNext}
                                         disabled={currentPage === totalPages}
                                     >
