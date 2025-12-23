@@ -13,7 +13,7 @@ function MemberSidebar() {
         const path = location.pathname;
         if (path.includes('/member/info')) return 'info';
         if (path.includes('/member/wishList')) return 'favorites';
-        if (path.includes('/member/history')) return 'history';
+        if (path.includes('/member/history') || path.includes('/member/qrcode')) return 'history';
         return 'info';
     };
 
