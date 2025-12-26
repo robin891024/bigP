@@ -23,3 +23,6 @@ OpenTicket 是一個全方位的線上票務平台，提供用戶瀏覽活動、
 *   **歷史紀錄**：串接訂單系統，讓用戶查看所有購票紀錄，並整合 **QRCode** 顯示功能供現場驗證。
 
 ---
+<img width="1919" height="861" alt="螢幕擷取畫面 2025-12-24 214429" src="https://github.com/user-attachments/assets/6cb5e449-e62a-4dec-8d40-caeeb0e1ef7e" />
+
+
